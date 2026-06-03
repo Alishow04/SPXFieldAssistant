@@ -317,36 +317,39 @@ onAuthStateChanged(auth, async (user) => {
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
+  
 :root {
-  --bg: #0e1117;
-  --bg2: #151820;
-  --bg3: #1c2030;
-  --bg4: #232840;
-  --surface: #1a1f2e;
-  --surface2: #212638;
-  --border: #2a3050;
-  --border2: #354070;
-  --accent: #3b82f6;
-  --accent2: #60a5fa;
-  --accent-dim: rgba(59,130,246,0.12);
-  --accent-glow: rgba(59,130,246,0.25);
-  --green: #10b981;
-  --green-dim: rgba(16,185,129,0.12);
-  --amber: #f59e0b;
-  --amber-dim: rgba(245,158,11,0.12);
-  --red: #ef4444;
-  --red-dim: rgba(239,68,68,0.12);
-  --text: #e8eaf0;
-  --text2: #8892aa;
-  --text3: #4a5270;
-  --font-head: 'Syne', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
-  --font-mono: 'DM Mono', monospace;
-  --r: 10px;
-  --r2: 6px;
-  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+
+  --fiedler-blue: #0054A6;
+  --fiedler-blue-dark: #003B78;
+  --fiedler-yellow: #FFF200;
+
+  --bg: #F4F7FB;
+  --bg2: #FFFFFF;
+
+  --surface: #FFFFFF;
+  --surface2: #F8FAFD;
+
+  --border: #DCE4F0;
+  --border2: #BFCFE5;
+
+  --accent: #0054A6;
+  --accent2: #003B78;
+
+  --green: #22C55E;
+  --amber: #F59E0B;
+  --red: #EF4444;
+
+  --text: #1B2B4B;
+  --text2: #5B6B88;
+  --text3: #93A0B8;
+
+  --font-head: 'Exo 2', sans-serif;
+  --font-body: 'Roboto', sans-serif;
+  --font-mono: Consolas, monospace;
+
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;min-height:100vh;line-height:1.5}
@@ -368,7 +371,18 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);fo
 .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
 
 /* SIDEBAR */
-.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+.sidebar {
+
+  background:
+    linear-gradient(
+      180deg,
+      #0054A6 0%,
+      #003B78 100%
+    );
+
+  color:white;
+}
+  ;border-right:1px solid var(--border);padding:16px 12px;display:flex;flex-direction:column;gap:4px}
 .nav-section{font-family:var(--font-mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:12px 10px 6px;margin-top:8px}
 .nav-section:first-child{margin-top:0}
 .nav-btn{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r2);cursor:pointer;font-size:13.5px;color:var(--text2);border:none;background:none;width:100%;text-align:left;transition:all .15s;font-family:var(--font-body)}
@@ -644,7 +658,19 @@ textarea{resize:vertical;min-height:72px}
 <!-- TOPBAR -->
 <header class="topbar">
   <div>
-    <div class="logo">SPX <span>Field</span> Assistant</div>
+    
+    <div style="padding:8px">
+
+<img
+src="logo-fiedler.png"
+style="
+width:220px;
+max-width:100%;
+"
+>
+
+</div>
+    
     <div class="logo-sub">Fiedler Automação Industrial</div>
   </div>
   <div class="topbar-right">
