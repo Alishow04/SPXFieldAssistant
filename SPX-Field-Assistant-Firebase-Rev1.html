@@ -15,6 +15,13 @@ import {
   getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+  import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyC9pMg75rju-dzJTXWvfja1Sd8Ox5WGenw",
   authDomain: "spx-field-assistant.firebaseapp.com",
@@ -28,6 +35,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
+
+const auth = getAuth(app);
+
+let currentUser = null;
+let currentRole = null;
 
 // --- Coleções ---
 const COL_VISITS = "spx_visits";
@@ -91,6 +103,9 @@ bootstrap().then(() => {
   console.log("Firebase conectado!");
   console.log("Projeto:", firebaseConfig.projectId);
 });
+
+  
+  
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -322,6 +337,47 @@ textarea{resize:vertical;min-height:72px}
 </style>
 </head>
 <body>
+
+<div id="loginScreen" style="
+position:fixed;
+inset:0;
+background:white;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:99999;
+">
+
+  <div style="width:350px">
+
+    <h2>SPX Field Assistant</h2>
+
+    <input
+      id="loginEmail"
+      type="email"
+      placeholder="E-mail"
+      style="width:100%;margin-bottom:10px;padding:10px;"
+    >
+
+    <input
+      id="loginPassword"
+      type="password"
+      placeholder="Senha"
+      style="width:100%;margin-bottom:10px;padding:10px;"
+    >
+
+    <button
+      id="btnLogin"
+      style="width:100%;padding:10px;"
+    >
+      Entrar
+    </button>
+
+    <div id="loginMsg"></div>
+
+  </div>
+
+</div>
 
 <div class="app">
 
