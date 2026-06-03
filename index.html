@@ -1688,12 +1688,25 @@ function renderReport(visitId) {
       ${!eq.length ? '<div class="empty" style="padding:40px 0"><div class="empty-icon">⚙️</div><div class="empty-title">Nenhum equipamento registrado</div></div>' :
       `<table class="report-table">
         <thead><tr>
-          <th>#</th><th>TAG</th><th>Família / Tipo</th><th>Part Number</th><th>Modelo</th><th>Bitola</th><th>Vedação</th><th>Controle</th><th>Nº Série</th><th>Ano</th><th>Qtd</th><th>Kit reparo</th><th>Condição</th>
+          <th>#</th>
+<th>TAG</th>
+<th>Família / Tipo</th>
+<th>Part Number</th>
+<th>Modelo</th>
+<th>Bitola</th>
+<th>Vedação</th>
+<th>Controle</th>
+<th>Nº Série</th>
+<th>Ano</th>
+<th>Qtd</th>
+<th>Kit reparo</th>
+<th>Condição</th>
         </tr></thead>
         <tbody>${eq.map((e, i) => {
           const condStyle = e.cond === 'Com defeito' ? 'color:var(--red)' : e.cond === 'Sem plaqueta' ? 'color:var(--amber)' : '';
           const kitStyle = e.kit && e.kit !== 'consultar' ? 'color:var(--green);font-family:var(--font-mono)' : 'color:var(--amber)';
-          return `<tr>
+          return `
+<tr>
   <td style="color:var(--text2)">${i+1}</td>
   <td style="font-family:var(--font-mono);font-size:11.5px">${e.tag||'—'}</td>
   <td>${e.familia||''} ${e.tipo ? '/ '+e.tipo : ''}</td>
@@ -1708,21 +1721,16 @@ function renderReport(visitId) {
   <td style="font-family:var(--font-mono);font-size:11.5px;color:var(--green);font-weight:700">${e.kit||'consultar'}</td>
   <td style="${condStyle}">${e.cond||'Ok'}</td>
 </tr>
-
-${e.key || e.obs ? `
 <tr>
   <td></td>
-  <td colspan="12" style="
-    font-size:11.5px;
-    color:var(--text2);
-    background:#FAFCFF;
-    padding-top:6px;
-    padding-bottom:10px;
-  ">
-    ${e.key ? `<strong style="color:var(--text)">KEY:</strong> <span style="font-family:var(--font-mono);color:var(--accent2)">${e.key}</span>` : ''}
-    ${e.obs ? `<br><strong style="color:var(--text)">Obs.:</strong> ${e.obs}` : ''}
+  <td colspan="12" style="font-size:11.5px;color:var(--text2);background:#FAFCFF;padding-top:6px;padding-bottom:10px">
+    <strong style="color:var(--text)">KEY:</strong>
+    <span style="font-family:var(--font-mono);color:var(--accent2)">
+      ${e.key || '—'}
+    </span>
+    ${e.obs ? '<br><strong style="color:var(--text)">Obs.:</strong> ' + e.obs : ''}
   </td>
-</tr>` : ''}
+</tr>`;
         }).join('')}</tbody>
       </table>`}
     </div>
