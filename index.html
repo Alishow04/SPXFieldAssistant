@@ -1865,21 +1865,26 @@ async function clearAll() {
 // =====================
 // UTILS
 // =====================
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
 
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Impede fechamento acidental clicando fora do modal
 document.querySelectorAll('.modal-overlay').forEach(m => {
 
   m.addEventListener('click', e => {
 
-    if (e.target !== m) return;
+    if (e.target === m) {
 
-    if (
-      confirm(
-        "Deseja fechar esta janela? Dados não salvos poderão ser perdidos."
-      )
-    ) {
-      m.classList.remove('open');
+      toast(
+        'Use Salvar, Cancelar ou o botão X para fechar.',
+        'info'
+      );
+
     }
 
   });
