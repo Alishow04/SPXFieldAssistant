@@ -1690,12 +1690,39 @@ function renderReport(visitId) {
 </div>
         </div>
       </div>
-      <div class="report-meta-grid">
-        <div class="report-meta-item"><div class="report-meta-label">LOCALIZAÇÃO</div><div class="report-meta-val">${v.cidade}${v.estado?' / '+v.estado:''}</div></div>
-        <div class="report-meta-item"><div class="report-meta-label">DATA DA VISITA</div><div class="report-meta-val">${formatDate(v.data)}</div></div>
-        <div class="report-meta-item"><div class="report-meta-label">TÉCNICO DA PLANTA</div><div class="report-meta-val">${v.tecPlanta || 'não informado'}</div></div>
-        <div class="report-meta-item"><div class="report-meta-label">TÉCNICO FIEDLER</div><div class="report-meta-val">${v.tecFiedler}</div></div>
-      </div>
+      <div class="report-meta-grid" style="
+  padding:20px 24px;
+  background:#fff;
+  border-bottom:1px solid var(--border);
+">
+  <div class="report-meta-item">
+    <div class="report-meta-label" style="color:#7E8CA1 !important;">LOCALIZAÇÃO</div>
+    <div class="report-meta-val" style="color:#12213F !important;font-weight:700;">
+      ${v.cidade}${v.estado?' / '+v.estado:''}
+    </div>
+  </div>
+
+  <div class="report-meta-item">
+    <div class="report-meta-label" style="color:#7E8CA1 !important;">DATA DA VISITA</div>
+    <div class="report-meta-val" style="color:#12213F !important;font-weight:700;">
+      ${formatDate(v.data)}
+    </div>
+  </div>
+
+  <div class="report-meta-item">
+    <div class="report-meta-label" style="color:#7E8CA1 !important;">TÉCNICO DA PLANTA</div>
+    <div class="report-meta-val" style="color:#12213F !important;font-weight:700;">
+      ${v.tecPlanta || 'não informado'}
+    </div>
+  </div>
+
+  <div class="report-meta-item">
+    <div class="report-meta-label" style="color:#7E8CA1 !important;">TÉCNICO FIEDLER</div>
+    <div class="report-meta-val" style="color:#12213F !important;font-weight:700;">
+      ${v.tecFiedler || 'não informado'}
+    </div>
+  </div>
+</div>
       ${v.obs ? `<div style="margin-top:12px;font-size:12px;color:#a0bfe0;padding:8px 12px;background:rgba(255,255,255,.06);border-radius:6px">${v.obs}</div>` : ''}
     </div>
     <div class="report-table-wrap">
