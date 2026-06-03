@@ -49,6 +49,7 @@ const COL_VISITS = "spx_visits";
 const COL_EQUIPS = "spx_equips";
 const COL_KITS   = "spx_kits";
 const COL_USERS  = "users";
+const COL_VALVE_SPECS = "spx_valve_specs";
 
 let realtimeUnsubscribers = [];
 
@@ -512,6 +513,29 @@ textarea{resize:vertical;min-height:72px}
 .upload-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px}
 .upload-sub{font-size:12.5px;color:var(--text2)}
 
+
+.tech-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.tech-found{
+  background:var(--green-dim);
+  border:1px solid rgba(16,185,129,0.3);
+  border-radius:var(--r2);
+  padding:10px 14px;
+  font-size:13px;
+  color:var(--green);
+}
+.tech-missing{
+  background:var(--amber-dim);
+  border:1px solid rgba(245,158,11,0.3);
+  border-radius:var(--r2);
+  padding:10px 14px;
+  font-size:13px;
+  color:var(--amber);
+}
+
 /* EMPTY STATE */
 .empty{text-align:center;padding:60px 20px;color:var(--text2)}
 .empty-icon{font-size:40px;margin-bottom:12px;opacity:.4}
@@ -879,11 +903,12 @@ textarea{resize:vertical;min-height:72px}
       <div class="form-grid">
         <div class="form-group">
           <label>Part Number</label>
-          <input id="e-pn" placeholder="Ex: H208970" oninput="lookupKit(this.value)">
+          <input id="e-pn" placeholder="Ex: H208970" oninput="lookupEquipmentData(this.value)">
           <div class="field-note">Digite para buscar kit de reparo automaticamente</div>
         </div>
         <div class="form-group"><label>Número de série</label><input id="e-serie" placeholder="Ex: 100000897654"></div>
         <div id="lookup-result" style="display:none;grid-column:span 2"></div>
+        <div id="spec-lookup-result" style="display:none;grid-column:span 2"></div>
         <div class="form-group"><label>Modelo</label><input id="e-modelo" placeholder="Ex: SW41"></div>
         <div class="form-group"><label>Ano de fabricação</label><input id="e-ano" placeholder="Ex: 2020" type="number" min="1980" max="2030"></div>
         <div class="form-group"><label>Família SPX *</label>
@@ -899,6 +924,26 @@ textarea{resize:vertical;min-height:72px}
           </select>
         </div>
       </div>
+
+      <div class="divider"></div>
+      <div class="card-title" style="margin-bottom:14px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12c.7.6 1 1.4 1 2h6c0-.6.3-1.4 1-2a7 7 0 0 0-4-12z"/></svg>
+        Informações técnicas da válvula
+      </div>
+      <div class="form-grid">
+        <div class="form-group span2"><label>Descrição</label><input id="e-desc" placeholder="Descrição técnica da válvula"></div>
+        <div class="form-group"><label>Tipo técnico</label><input id="e-valve-tipo" placeholder="Ex: L"></div>
+        <div class="form-group"><label>Bitola</label><input id="e-bitola" placeholder="Ex: 1&quot;"></div>
+        <div class="form-group"><label>Material vedação</label><input id="e-vedacao" placeholder="Ex: EPDM"></div>
+        <div class="form-group"><label>Posição atuador</label><input id="e-posicao-atuador" placeholder="Ex: NC"></div>
+        <div class="form-group"><label>Atuador / acionamento</label><input id="e-atuador" placeholder="Ex: Actuator"></div>
+        <div class="form-group"><label>Controle</label><input id="e-controle" placeholder="Ex: CU41 24V DC"></div>
+        <div class="form-group"><label>Conexões</label><input id="e-conexoes" placeholder="Ex: Welding ends"></div>
+        <div class="form-group"><label>Acabamento superficial</label><input id="e-acabamento" placeholder="Ex: Inside Polished 0,8um"></div>
+        <div class="form-group"><label>Especiais</label><input id="e-especiais" placeholder="Caso houver"></div>
+        <div class="form-group span2"><label>KEY</label><input id="e-key" placeholder="KEY técnica"></div>
+      </div>
+
       <div class="divider"></div>
       <div class="card-title" style="margin-bottom:14px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -963,6 +1008,8 @@ textarea{resize:vertical;min-height:72px}
 var visits     = window.visits     || [];
 var equipments = window.equipments || [];
 var kits       = window.kits       || [];
+var valveSpecs = window.valveSpecs || {};
+let valveSpecsLoaded = null;
 let editingVisitId = null;
 let editingEquipId = null;
 let currentVisitId = null;
@@ -989,7 +1036,115 @@ window._appInit = function() {
   updateNavCounts();
   renderVisits();
   if (!kits.length) loadSampleKits();
+  loadValveSpecs();
 };
+
+
+function normalizePN(pn) {
+  return String(pn || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+function safeSet(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.value = value || '';
+}
+
+function safeGet(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+async function loadValveSpecs() {
+  if (valveSpecsLoaded) return valveSpecsLoaded;
+
+  valveSpecsLoaded = fetch('valve_specs.json', { cache: 'force-cache' })
+    .then(res => {
+      if (!res.ok) throw new Error('Arquivo valve_specs.json não encontrado');
+      return res.json();
+    })
+    .then(data => {
+      valveSpecs = data || {};
+      window.valveSpecs = valveSpecs;
+      console.log('Catálogo técnico carregado:', Object.keys(valveSpecs).length, 'válvulas');
+      return valveSpecs;
+    })
+    .catch(err => {
+      console.warn('Catálogo técnico:', err);
+      valveSpecs = {};
+      window.valveSpecs = valveSpecs;
+      return valveSpecs;
+    });
+
+  return valveSpecsLoaded;
+}
+
+async function lookupEquipmentData(pn) {
+  lookupKit(pn);
+  await lookupValveSpec(pn);
+}
+
+async function lookupValveSpec(pn) {
+  const clean = normalizePN(pn);
+  const res = document.getElementById('spec-lookup-result');
+
+  if (!clean) {
+    if (res) res.style.display = 'none';
+    return;
+  }
+
+  await loadValveSpecs();
+
+  const spec = valveSpecs[clean];
+
+  if (!spec) {
+    if (res && clean.length >= 4) {
+      res.style.display = 'block';
+      res.innerHTML = `<div class="tech-missing">Catálogo técnico: Part Number não encontrado. Preencha as informações manualmente.</div>`;
+    }
+    return;
+  }
+
+  safeSet('e-desc', spec.descricao);
+  safeSet('e-modelo', spec.modelo);
+  safeSet('e-valve-tipo', spec.valveTipo);
+  safeSet('e-bitola', spec.bitola);
+  safeSet('e-vedacao', spec.materialVedacao);
+  safeSet('e-posicao-atuador', spec.posicaoAtuador);
+  safeSet('e-atuador', spec.atuador);
+  safeSet('e-controle', spec.controle);
+  safeSet('e-conexoes', spec.conexoes);
+  safeSet('e-acabamento', spec.acabamentoSuperficial);
+  safeSet('e-especiais', spec.especiais);
+  safeSet('e-key', spec.key);
+
+  // Se encontrou no catálogo técnico, normalmente é uma válvula.
+  const tipoEquip = document.getElementById('e-tipo');
+  if (tipoEquip && !tipoEquip.value) tipoEquip.value = 'Válvula';
+
+  const familia = document.getElementById('e-familia');
+  if (familia && !familia.value) familia.value = 'APV';
+
+  if (res) {
+    res.style.display = 'block';
+    res.innerHTML = `<div class="tech-found">Catálogo técnico encontrado: ${spec.descricao || 'Válvula'} ${spec.modelo ? '· ' + spec.modelo : ''}${spec.bitola ? ' · ' + spec.bitola : ''}</div>`;
+  }
+}
+
+function collectTechnicalFields() {
+  return {
+    descricao: safeGet('e-desc'),
+    valveTipo: safeGet('e-valve-tipo'),
+    bitola: safeGet('e-bitola'),
+    materialVedacao: safeGet('e-vedacao'),
+    posicaoAtuador: safeGet('e-posicao-atuador'),
+    atuador: safeGet('e-atuador'),
+    controle: safeGet('e-controle'),
+    conexoes: safeGet('e-conexoes'),
+    acabamentoSuperficial: safeGet('e-acabamento'),
+    especiais: safeGet('e-especiais'),
+    key: safeGet('e-key')
+  };
+}
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
@@ -1181,6 +1336,9 @@ function renderEquips(visitId) {
           ${e.tipo ? `<span>${e.tipo}</span>` : ''}
           ${e.serie ? `<span>S/N: ${e.serie}</span>` : ''}
           ${e.ano ? `<span>${e.ano}</span>` : ''}
+          ${e.bitola ? `<span>Bitola: ${e.bitola}</span>` : ''}
+          ${e.materialVedacao ? `<span>Vedação: ${e.materialVedacao}</span>` : ''}
+          ${e.key ? `<span>KEY: ${e.key}</span>` : ''}
           ${e.tag ? `<span>TAG: <strong style="color:var(--text)">${e.tag}</strong></span>` : ''}
           ${e.qtd > 1 ? `<span>Qtd: ${e.qtd}</span>` : ''}
           ${kitBadge} ${condBadge}
@@ -1203,6 +1361,17 @@ function openEquipModal(id = null) {
   document.getElementById('e-pn').value = e?.pn || '';
   document.getElementById('e-serie').value = e?.serie || '';
   document.getElementById('e-modelo').value = e?.modelo || '';
+  safeSet('e-desc', e?.descricao || '');
+  safeSet('e-valve-tipo', e?.valveTipo || '');
+  safeSet('e-bitola', e?.bitola || '');
+  safeSet('e-vedacao', e?.materialVedacao || '');
+  safeSet('e-posicao-atuador', e?.posicaoAtuador || '');
+  safeSet('e-atuador', e?.atuador || '');
+  safeSet('e-controle', e?.controle || '');
+  safeSet('e-conexoes', e?.conexoes || '');
+  safeSet('e-acabamento', e?.acabamentoSuperficial || '');
+  safeSet('e-especiais', e?.especiais || '');
+  safeSet('e-key', e?.key || '');
   document.getElementById('e-ano').value = e?.ano || '';
   document.getElementById('e-familia').value = e?.familia || '';
   document.getElementById('e-tipo').value = e?.tipo || '';
@@ -1212,15 +1381,17 @@ function openEquipModal(id = null) {
   document.getElementById('e-kit').value = e?.kit || '';
   document.getElementById('e-obs').value = e?.obs || '';
   document.getElementById('lookup-result').style.display = 'none';
-  if (e?.pn) lookupKit(e.pn, false);
+  const specRes = document.getElementById('spec-lookup-result');
+  if (specRes) specRes.style.display = 'none';
+  if (e?.pn) lookupEquipmentData(e.pn);
   openModal('modal-equip');
 }
 
 function lookupKit(pn, setField = true) {
-  const clean = pn.trim().toUpperCase();
+  const clean = normalizePN(pn);
   const res = document.getElementById('lookup-result');
   if (!clean) { res.style.display = 'none'; return; }
-  const found = kits.find(k => k.pn.toUpperCase() === clean);
+  const found = kits.find(k => normalizePN(k.pn) === clean);
   if (found) {
     res.style.display = 'block';
     res.innerHTML = `<div class="lookup-box"><div class="lookup-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg></div><div class="lookup-text">Kit encontrado: <span class="lookup-kit">${found.kit}</span>${found.desc?' — '+found.desc:''}</div></div>`;
@@ -1254,6 +1425,7 @@ async function saveEquip() {
     cond: document.getElementById('e-cond').value,
     kit: document.getElementById('e-kit').value.trim(),
     obs: document.getElementById('e-obs').value.trim(),
+    ...collectTechnicalFields()
   };
 
   try {
@@ -1576,7 +1748,7 @@ function renderReport(visitId) {
       ${!eq.length ? '<div class="empty" style="padding:40px 0"><div class="empty-icon">⚙️</div><div class="empty-title">Nenhum equipamento registrado</div></div>' :
       `<table class="report-table">
         <thead><tr>
-          <th>#</th><th>TAG</th><th>Família / Tipo</th><th>Part Number</th><th>Modelo</th><th>Nº Série</th><th>Ano</th><th>Qtd</th><th>Condição</th><th>Kit de reparo</th><th>Observações</th>
+          <th>#</th><th>TAG</th><th>Família / Tipo</th><th>Part Number</th><th>Modelo</th><th>Bitola</th><th>Vedação</th><th>Controle</th><th>KEY</th><th>Nº Série</th><th>Ano</th><th>Qtd</th><th>Condição</th><th>Kit de reparo</th><th>Observações</th>
         </tr></thead>
         <tbody>${eq.map((e, i) => {
           const condStyle = e.cond === 'Com defeito' ? 'color:var(--red)' : e.cond === 'Sem plaqueta' ? 'color:var(--amber)' : '';
@@ -1587,6 +1759,10 @@ function renderReport(visitId) {
             <td>${e.familia||''} ${e.tipo ? '/ '+e.tipo : ''}</td>
             <td style="font-family:var(--font-mono);font-size:12px;color:var(--accent2)">${e.pn||'—'}</td>
             <td>${e.modelo||'—'}</td>
+            <td>${e.bitola||'—'}</td>
+            <td>${e.materialVedacao||'—'}</td>
+            <td>${e.controle||'—'}</td>
+            <td style="font-family:var(--font-mono);font-size:11px">${e.key||'—'}</td>
             <td style="font-family:var(--font-mono);font-size:11.5px">${e.serie||'—'}</td>
             <td>${e.ano||'—'}</td>
             <td style="text-align:center">${e.qtd||1}</td>
@@ -1613,8 +1789,8 @@ function exportCSV() {
   if (!currentVisitId) return;
   const v = visits.find(x => x.id === currentVisitId);
   const eq = equipments.filter(e => e.visitId === currentVisitId);
-  const header = ['#','TAG','Família','Tipo','Part Number','Modelo','Nº Série','Ano','Qtd','Condição','Kit de reparo','Observações'];
-  const rows = eq.map((e, i) => [i+1, e.tag||'', e.familia||'', e.tipo||'', e.pn||'', e.modelo||'', e.serie||'', e.ano||'', e.qtd||1, e.cond||'Ok', e.kit||'consultar', e.obs||'']);
+  const header = ['#','TAG','Família','Tipo','Part Number','Descrição','Modelo','Tipo técnico','Bitola','Material Vedação','Posição Atuador','Atuador','Controle','Conexões','Acabamento superficial','Especiais','KEY','Nº Série','Ano','Qtd','Condição','Kit de reparo','Observações'];
+  const rows = eq.map((e, i) => [i+1, e.tag||'', e.familia||'', e.tipo||'', e.pn||'', e.descricao||'', e.modelo||'', e.valveTipo||'', e.bitola||'', e.materialVedacao||'', e.posicaoAtuador||'', e.atuador||'', e.controle||'', e.conexoes||'', e.acabamentoSuperficial||'', e.especiais||'', e.key||'', e.serie||'', e.ano||'', e.qtd||1, e.cond||'Ok', e.kit||'consultar', e.obs||'']);
   const meta = [
     [`Cliente: ${v.cliente}`], [`CNPJ: ${v.cnpj}`], [`Cidade/Estado: ${v.cidade}/${v.estado}`],
     [`Técnico planta: ${v.tecPlanta}`], [`Técnico Fiedler: ${v.tecFiedler}`], [`Data: ${formatDate(v.data)}`], []
