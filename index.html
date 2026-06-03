@@ -1891,6 +1891,20 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
 
 });
 
+  window.addEventListener('beforeunload', function (e) {
+
+  const modalAberto =
+    document.querySelector('.modal-overlay.open');
+
+  if (modalAberto) {
+
+    e.preventDefault();
+    e.returnValue = '';
+
+  }
+
+});
+
 function toast(msg, type = 'info') {
   const wrap = document.getElementById('toast-wrap');
   const el = document.createElement('div');
