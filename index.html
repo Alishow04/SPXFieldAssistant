@@ -563,6 +563,45 @@ textarea{resize:vertical;min-height:72px}
   color:#12213F !important;
 }
 
+
+.recommended-summary{
+  padding:20px 24px 24px;
+  border-top:1px solid var(--border);
+  background:#fff;
+}
+.recommended-title{
+  font-family:var(--font-head);
+  font-size:15px;
+  font-weight:800;
+  color:var(--text);
+  margin-bottom:10px;
+}
+.recommended-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+.recommended-table th{
+  background:#EEF3FA;
+  color:var(--text2);
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  padding:8px 10px;
+  text-align:left;
+  border-bottom:1px solid var(--border);
+}
+.recommended-table td{
+  padding:8px 10px;
+  border-bottom:1px solid var(--border);
+  color:var(--text);
+}
+.recommended-table tr:last-child td{
+  border-bottom:none;
+}
+.report-key-row td{
+  background:#FAFCFF !important;
+}
+
 </style>
 </head>
 <body>
@@ -896,14 +935,17 @@ textarea{resize:vertical;min-height:72px}
       </div>
       <div class="form-grid cols3">
         <div class="form-group"><label>TAG do cliente</label><input id="e-tag" placeholder="Ex: VLV-101"></div>
+        <div class="form-group"><label>Setor</label><input id="e-setor" placeholder="Ex: Pasteurização"></div>
         <div class="form-group"><label>Quantidade *</label><input id="e-qtd" type="number" value="1" min="1"></div>
         <div class="form-group"><label>Condição *</label>
           <select id="e-cond">
             <option>Ok</option><option>Com defeito</option><option>Sem plaqueta</option>
           </select>
         </div>
-        <div class="form-group"><label>Kit de reparo</label><input id="e-kit" placeholder="Automático ou manual"></div>
-        <div class="form-group span2"><label>Observações</label><input id="e-obs" placeholder="Defeitos, condições especiais..."></div>
+        <div class="form-group"><label>Kit Vedação</label><input id="e-kit" placeholder="Automático ou manual"></div>
+        <div class="form-group"><label>Unidade de Controle</label><input id="e-unidade-controle" placeholder="Automático ou manual"></div>
+        <div class="form-group"><label>Kit Adaptador</label><input id="e-kit-adaptador" placeholder="Automático ou manual"></div>
+        <div class="form-group span3"><label>Observações</label><input id="e-obs" placeholder="Defeitos, condições especiais..."></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1061,6 +1103,9 @@ async function lookupValveSpec(pn) {
   safeSet('e-acabamento', spec.acabamentoSuperficial);
   safeSet('e-especiais', spec.especiais);
   safeSet('e-key', spec.key);
+  safeSet('e-kit', spec.kitReparo || spec.kitVedacao || spec.kit);
+  safeSet('e-unidade-controle', spec.unidadeControle);
+  safeSet('e-kit-adaptador', spec.kitAdaptador);
 
   // Se encontrou no catálogo técnico, normalmente é uma válvula.
   const tipoEquip = document.getElementById('e-tipo');
@@ -1087,7 +1132,10 @@ function collectTechnicalFields() {
     conexoes: safeGet('e-conexoes'),
     acabamentoSuperficial: safeGet('e-acabamento'),
     especiais: safeGet('e-especiais'),
-    key: safeGet('e-key')
+    key: safeGet('e-key'),
+    kitReparo: safeGet('e-kit'),
+    unidadeControle: safeGet('e-unidade-controle'),
+    kitAdaptador: safeGet('e-kit-adaptador')
   };
 }
 
@@ -1285,6 +1333,9 @@ function renderEquips(visitId) {
           ${e.materialVedacao ? `<span>Vedação: ${e.materialVedacao}</span>` : ''}
           ${e.key ? `<span>KEY: ${e.key}</span>` : ''}
           ${e.tag ? `<span>TAG: <strong style="color:var(--text)">${e.tag}</strong></span>` : ''}
+          ${e.setor ? `<span>Setor: <strong style="color:var(--text)">${e.setor}</strong></span>` : ''}
+          ${e.unidadeControle ? `<span>Unid. Controle: <strong style="color:var(--text)">${e.unidadeControle}</strong></span>` : ''}
+          ${e.kitAdaptador ? `<span>Adaptador: <strong style="color:var(--text)">${e.kitAdaptador}</strong></span>` : ''}
           ${e.qtd > 1 ? `<span>Qtd: ${e.qtd}</span>` : ''}
           ${kitBadge} ${condBadge}
         </div>
@@ -1321,9 +1372,12 @@ function openEquipModal(id = null) {
   document.getElementById('e-familia').value = e?.familia || '';
   document.getElementById('e-tipo').value = e?.tipo || '';
   document.getElementById('e-tag').value = e?.tag || '';
+  safeSet('e-setor', e?.setor || '');
   document.getElementById('e-qtd').value = e?.qtd || 1;
   document.getElementById('e-cond').value = e?.cond || 'Ok';
-  document.getElementById('e-kit').value = e?.kit || '';
+  document.getElementById('e-kit').value = e?.kit || e?.kitReparo || '';
+  safeSet('e-unidade-controle', e?.unidadeControle || '');
+  safeSet('e-kit-adaptador', e?.kitAdaptador || '');
   document.getElementById('e-obs').value = e?.obs || '';
   document.getElementById('lookup-result').style.display = 'none';
   const specRes = document.getElementById('spec-lookup-result');
@@ -1366,9 +1420,13 @@ async function saveEquip() {
     ano: document.getElementById('e-ano').value,
     familia, tipo,
     tag: document.getElementById('e-tag').value.trim(),
+    setor: safeGet('e-setor'),
     qtd: parseInt(document.getElementById('e-qtd').value) || 1,
     cond: document.getElementById('e-cond').value,
     kit: document.getElementById('e-kit').value.trim(),
+    kitReparo: document.getElementById('e-kit').value.trim(),
+    unidadeControle: safeGet('e-unidade-controle'),
+    kitAdaptador: safeGet('e-kit-adaptador'),
     obs: document.getElementById('e-obs').value.trim(),
     ...collectTechnicalFields()
   };
@@ -1638,14 +1696,220 @@ async function importKits(input) {
   input.value = '';
 }
 
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function normalizeRepairCode(code) {
+  const clean = String(code || '').trim();
+  if (!clean || clean.toLowerCase() === 'consultar' || clean === '—') return '';
+  return clean.toUpperCase();
+}
+
+function buildRecommendedParts(equipList) {
+  const groups = {};
+
+  function add(code, type, qty) {
+    const clean = normalizeRepairCode(code);
+    if (!clean) return;
+
+    if (!groups[clean]) {
+      groups[clean] = {
+        codigo: clean,
+        tipos: new Set(),
+        qtd: 0
+      };
+    }
+
+    groups[clean].tipos.add(type);
+    groups[clean].qtd += qty || 1;
+  }
+
+  equipList.forEach(e => {
+    const qty = parseInt(e.qtd) || 1;
+    add(e.kitReparo || e.kit, 'Kit Vedação', qty);
+    add(e.unidadeControle, 'Unidade de Controle', qty);
+    add(e.kitAdaptador, 'Kit Adaptador', qty);
+  });
+
+  return Object.values(groups)
+    .map(item => ({
+      codigo: item.codigo,
+      tipo: Array.from(item.tipos).join(' / '),
+      qtd: item.qtd
+    }))
+    .sort((a, b) => a.tipo.localeCompare(b.tipo) || a.codigo.localeCompare(b.codigo));
+}
+
+function renderRecommendedParts(equipList) {
+  const parts = buildRecommendedParts(equipList);
+
+  if (!parts.length) return '';
+
+  return `
+    <div class="recommended-summary">
+      <div class="recommended-title">Resumo de peças recomendadas</div>
+      <table class="recommended-table">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Código</th>
+            <th style="text-align:center">Quantidade</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${parts.map(p => `
+            <tr>
+              <td>${escapeHtml(p.tipo)}</td>
+              <td style="font-family:var(--font-mono);font-weight:700;color:var(--accent2)">${escapeHtml(p.codigo)}</td>
+              <td style="text-align:center;font-weight:800">${p.qtd}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
 // =====================
 // REPORT
 // =====================
-function renderReportSelectors() {
-  const sel = document.getElementById('report-visit-selector');
-  sel.innerHTML = '<option value="">-- Selecionar visita --</option>' +
-    visits.map(v => `<option value="${v.id}">${v.cliente} (${formatDate(v.data)})</option>`).join('');
-  if (currentVisitId) { sel.value = currentVisitId; renderReport(currentVisitId); }
+function renderReport(visitId) {
+  const csvBtn = document.getElementById('btn-csv');
+  const printBtn = document.getElementById('btn-print');
+  const el = document.getElementById('report-container');
+
+  if (!visitId) {
+    csvBtn.style.display = 'none';
+    printBtn.style.display = 'none';
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📄</div><div class="empty-title">Selecione uma visita</div></div>`;
+    return;
+  }
+
+  currentVisitId = visitId;
+  const v = visits.find(x => x.id === visitId);
+  const eq = equipments.filter(e => e.visitId === visitId);
+  const kitsOk = eq.filter(e => (e.kitReparo || e.kit) && (e.kitReparo || e.kit) !== 'consultar').length;
+  const consultar = eq.filter(e => !(e.kitReparo || e.kit) || (e.kitReparo || e.kit) === 'consultar').length;
+  const defeito = eq.filter(e => e.cond === 'Com defeito').length;
+
+  csvBtn.style.display = 'inline-flex';
+  printBtn.style.display = 'inline-flex';
+
+  const rowsHtml = eq.map((e, i) => {
+    const condStyle = e.cond === 'Com defeito'
+      ? 'color:var(--red);font-weight:700'
+      : e.cond === 'Sem plaqueta'
+        ? 'color:var(--amber);font-weight:700'
+        : 'font-weight:700';
+
+    const kitVedacao = e.kitReparo || e.kit || 'consultar';
+    const unidadeControle = e.unidadeControle || '—';
+    const kitAdaptador = e.kitAdaptador || '—';
+
+    return `
+      <tr>
+        <td style="color:var(--text2)">${i + 1}</td>
+        <td style="font-family:var(--font-mono);font-size:11.5px">${escapeHtml(e.tag || '—')}</td>
+        <td>${escapeHtml(e.setor || '—')}</td>
+        <td>${escapeHtml(e.familia || '')} ${e.tipo ? '/ ' + escapeHtml(e.tipo) : ''}</td>
+        <td style="font-family:var(--font-mono);font-size:12px;color:var(--accent2);font-weight:700">${escapeHtml(e.pn || '—')}</td>
+        <td>${escapeHtml(e.modelo || '—')}</td>
+        <td>${escapeHtml(e.bitola || '—')}</td>
+        <td>${escapeHtml(e.materialVedacao || '—')}</td>
+        <td>${escapeHtml(e.controle || '—')}</td>
+        <td style="text-align:center">${e.qtd || 1}</td>
+        <td style="font-family:var(--font-mono);font-size:11.5px;color:var(--green);font-weight:700">${escapeHtml(kitVedacao)}</td>
+        <td style="font-family:var(--font-mono);font-size:11.5px;color:var(--accent2);font-weight:700">${escapeHtml(unidadeControle)}</td>
+        <td style="font-family:var(--font-mono);font-size:11.5px;color:var(--accent2);font-weight:700">${escapeHtml(kitAdaptador)}</td>
+        <td style="${condStyle}">${escapeHtml(e.cond || 'Ok')}</td>
+      </tr>
+      <tr class="report-key-row">
+        <td></td>
+        <td colspan="13" style="font-size:11.5px;color:var(--text2);background:#FAFCFF;padding-top:6px;padding-bottom:10px">
+          <strong style="color:var(--text)">KEY:</strong>
+          <span style="font-family:var(--font-mono);color:var(--accent2)">${escapeHtml(e.key || '—')}</span>
+          ${e.obs ? '<br><strong style="color:var(--text)">Obs.:</strong> ' + escapeHtml(e.obs) : ''}
+        </td>
+      </tr>`;
+  }).join('');
+
+  el.innerHTML = `<div class="report-preview">
+    <div class="report-header-bar">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:#7ca7d8;margin-bottom:6px;letter-spacing:.08em">RELATÓRIO DE BASE INSTALADA — PLA</div>
+          <div class="report-company">${escapeHtml(v.cliente)}</div>
+          <div class="report-sub">CNPJ: ${escapeHtml(v.cnpj || 'não informado')}</div>
+        </div>
+        <div style="text-align:right">
+          <img src="logo-fiedler-negativa.png" alt="Fiedler" style="width:180px;max-width:100%;height:auto;object-fit:contain">
+        </div>
+      </div>
+    </div>
+
+    <div class="report-meta-grid" style="padding:20px 24px;background:#fff;border-bottom:1px solid var(--border);margin-top:0">
+      <div class="report-meta-item">
+        <div class="report-meta-label" style="color:#7E8CA1 !important;">LOCALIZAÇÃO</div>
+        <div class="report-meta-val" style="color:#12213F !important;font-weight:700;">${escapeHtml(v.cidade)}${v.estado ? ' / ' + escapeHtml(v.estado) : ''}</div>
+      </div>
+      <div class="report-meta-item">
+        <div class="report-meta-label" style="color:#7E8CA1 !important;">DATA DA VISITA</div>
+        <div class="report-meta-val" style="color:#12213F !important;font-weight:700;">${formatDate(v.data)}</div>
+      </div>
+      <div class="report-meta-item">
+        <div class="report-meta-label" style="color:#7E8CA1 !important;">TÉCNICO DA PLANTA</div>
+        <div class="report-meta-val" style="color:#12213F !important;font-weight:700;">${escapeHtml(v.tecPlanta || 'não informado')}</div>
+      </div>
+      <div class="report-meta-item">
+        <div class="report-meta-label" style="color:#7E8CA1 !important;">TÉCNICO FIEDLER</div>
+        <div class="report-meta-val" style="color:#12213F !important;font-weight:700;">${escapeHtml(v.tecFiedler || 'não informado')}</div>
+      </div>
+      ${v.obs ? `<div class="report-meta-item" style="grid-column:span 2"><div class="report-meta-label" style="color:#7E8CA1 !important;">OBSERVAÇÕES</div><div class="report-meta-val" style="color:#12213F !important;font-weight:700;">${escapeHtml(v.obs)}</div></div>` : ''}
+    </div>
+
+    <div class="report-table-wrap">
+      ${!eq.length ? '<div class="empty" style="padding:40px 0"><div class="empty-icon">⚙️</div><div class="empty-title">Nenhum equipamento registrado</div></div>' :
+      `<table class="report-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>TAG</th>
+            <th>Setor</th>
+            <th>Família / Tipo</th>
+            <th>Part Number</th>
+            <th>Modelo</th>
+            <th>Bitola</th>
+            <th>Vedação</th>
+            <th>Controle</th>
+            <th>Qtd</th>
+            <th>Kit Vedação</th>
+            <th>Unid. Controle</th>
+            <th>Kit Adaptador</th>
+            <th>Condição</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>`}
+    </div>
+
+    ${renderRecommendedParts(eq)}
+
+    <div class="report-footer">
+      <div class="report-summary">
+        <strong>${eq.length}</strong> equipamentos &nbsp;·&nbsp;
+        <strong style="color:var(--green)">${kitsOk}</strong> kits identificados &nbsp;·&nbsp;
+        <strong style="color:var(--amber)">${consultar}</strong> a consultar
+        ${defeito ? ` &nbsp;·&nbsp; <strong style="color:var(--red)">${defeito}</strong> com defeito` : ''}
+      </div>
+      <div style="font-size:12px;color:var(--text3)">Gerado em ${new Date().toLocaleString('pt-BR')}</div>
+    </div>
+  </div>`;
 }
 
 function renderReport(visitId) {
@@ -1789,20 +2053,94 @@ function renderReport(visitId) {
 
 function exportCSV() {
   if (!currentVisitId) return;
+
   const v = visits.find(x => x.id === currentVisitId);
   const eq = equipments.filter(e => e.visitId === currentVisitId);
-  const header = ['#','TAG','Família','Tipo','Part Number','Descrição','Modelo','Tipo técnico','Bitola','Material Vedação','Posição Atuador','Atuador','Controle','Conexões','Acabamento superficial','Especiais','KEY','Nº Série','Ano','Qtd','Condição','Kit de reparo','Observações'];
-  const rows = eq.map((e, i) => [i+1, e.tag||'', e.familia||'', e.tipo||'', e.pn||'', e.descricao||'', e.modelo||'', e.valveTipo||'', e.bitola||'', e.materialVedacao||'', e.posicaoAtuador||'', e.atuador||'', e.controle||'', e.conexoes||'', e.acabamentoSuperficial||'', e.especiais||'', e.key||'', e.serie||'', e.ano||'', e.qtd||1, e.cond||'Ok', e.kit||'consultar', e.obs||'']);
-  const meta = [
-    [`Cliente: ${v.cliente}`], [`CNPJ: ${v.cnpj}`], [`Cidade/Estado: ${v.cidade}/${v.estado}`],
-    [`Técnico planta: ${v.tecPlanta}`], [`Técnico Fiedler: ${v.tecFiedler}`], [`Data: ${formatDate(v.data)}`], []
+
+  const header = [
+    '#',
+    'TAG',
+    'Setor',
+    'Família',
+    'Tipo',
+    'Part Number',
+    'Descrição',
+    'Modelo',
+    'Tipo técnico',
+    'Bitola',
+    'Material Vedação',
+    'Posição Atuador',
+    'Atuador',
+    'Controle',
+    'Conexões',
+    'Acabamento superficial',
+    'Especiais',
+    'KEY',
+    'Qtd',
+    'Kit Vedação',
+    'Unidade Controle',
+    'Kit Adaptador',
+    'Condição',
+    'Observações'
   ];
-  const csv = [...meta.map(r => r.join(';')), header.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+
+  const rows = eq.map((e, i) => [
+    i + 1,
+    e.tag || '',
+    e.setor || '',
+    e.familia || '',
+    e.tipo || '',
+    e.pn || '',
+    e.descricao || '',
+    e.modelo || '',
+    e.valveTipo || '',
+    e.bitola || '',
+    e.materialVedacao || '',
+    e.posicaoAtuador || '',
+    e.atuador || '',
+    e.controle || '',
+    e.conexoes || '',
+    e.acabamentoSuperficial || '',
+    e.especiais || '',
+    e.key || '',
+    e.qtd || 1,
+    e.kitReparo || e.kit || 'consultar',
+    e.unidadeControle || '',
+    e.kitAdaptador || '',
+    e.cond || 'Ok',
+    e.obs || ''
+  ]);
+
+  const parts = buildRecommendedParts(eq);
+  const partsRows = parts.map(p => [p.tipo, p.codigo, p.qtd]);
+
+  const meta = [
+    [`Cliente: ${v.cliente}`],
+    [`CNPJ: ${v.cnpj}`],
+    [`Cidade/Estado: ${v.cidade}/${v.estado}`],
+    [`Técnico planta: ${v.tecPlanta}`],
+    [`Técnico Fiedler: ${v.tecFiedler}`],
+    [`Data: ${formatDate(v.data)}`],
+    []
+  ];
+
+  const csv = [
+    ...meta.map(r => r.join(';')),
+    header.join(';'),
+    ...rows.map(r => r.map(x => String(x).replaceAll(';', ',')).join(';')),
+    [],
+    ['Resumo de peças recomendadas'],
+    ['Tipo', 'Código', 'Quantidade'].join(';'),
+    ...partsRows.map(r => r.join(';'))
+  ].join('\r\n');
+
   const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url;
+  const a = document.createElement('a');
+  a.href = url;
   a.download = `PLA_${v.cliente.replace(/\s+/g,'_')}_${v.data}.csv`;
-  a.click(); URL.revokeObjectURL(url);
+  a.click();
+  URL.revokeObjectURL(url);
   toast('CSV exportado com sucesso', 'success');
 }
 
