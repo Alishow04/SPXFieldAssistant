@@ -937,6 +937,8 @@ textarea{resize:vertical;min-height:72px}
 <!-- TOASTS -->
 <div class="toast-wrap" id="toast-wrap"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <script>
 // =====================
 // STATE & STORAGE — Firestore
@@ -1349,35 +1351,160 @@ async function clearKits() {
 async function importKits(input) {
   const file = input.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async e => {
-    const text = e.target.result;
-    const lines = text.split(/\r?\n/).filter(l => l.trim());
-    let added = 0, skipped = 0;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  try {
+    let rows = [];
+
+    if (ext === 'xlsx' || ext === 'xls') {
+      if (typeof XLSX === 'undefined') {
+        toast('Biblioteca XLSX não carregada. Verifique sua conexão.', 'error');
+        input.value = '';
+        return;
+      }
+
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+
+      if (!sheetName) {
+        toast('A planilha não possui abas para importar.', 'error');
+        input.value = '';
+        return;
+      }
+
+      const sheet = workbook.Sheets[sheetName];
+
+      rows = XLSX.utils.sheet_to_json(sheet, {
+        defval: '',
+        raw: false
+      });
+
+    } else {
+      const text = await file.text();
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+
+      if (!lines.length) {
+        toast('Arquivo vazio.', 'error');
+        input.value = '';
+        return;
+      }
+
+      const headers = lines[0]
+        .split(/[;,\t]/)
+        .map(h => h.trim().toLowerCase());
+
+      rows = lines.slice(1).map(line => {
+        const cols = line.split(/[;,\t]/);
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = cols[i] || '');
+        return obj;
+      });
+    }
+
+    let added = 0;
+    let skipped = 0;
     const newKits = [];
-    lines.forEach((line, i) => {
-      if (i === 0 && line.toLowerCase().includes('part')) return;
-      const cols = line.split(/[;,\t]/);
-      const pn = cols[0]?.trim().toUpperCase();
-      const kit = cols[1]?.trim();
-      if (!pn || !kit) return;
-      if (kits.find(k => k.pn === pn)) { skipped++; return; }
-      newKits.push({ id: uid(), pn, kit, desc: cols[2]?.trim() || '', familia: cols[3]?.trim() || '' });
+
+    rows.forEach(row => {
+      const normal = {};
+
+      Object.keys(row).forEach(k => {
+        const normalizedKey = k
+          .trim()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+
+        normal[normalizedKey] = String(row[k]).trim();
+      });
+
+      const pn =
+        normal.part_number ||
+        normal.partnumber ||
+        normal.pn ||
+        normal['part number'] ||
+        normal.codigo ||
+        normal['codigo h'] ||
+        '';
+
+      const desc =
+        normal.descricao ||
+        normal.description ||
+        normal.desc ||
+        normal.modelo ||
+        '';
+
+      const kit =
+        normal.kit_reparo ||
+        normal.kit ||
+        normal['kit reparo'] ||
+        normal['kit de reparo'] ||
+        normal.reparo ||
+        '';
+
+      const familia =
+        normal.familia ||
+        normal.family ||
+        '';
+
+      const cleanPN = pn.trim().toUpperCase();
+      const cleanKit = kit.trim();
+
+      if (!cleanPN || !cleanKit) return;
+
+      const alreadyExists =
+        kits.find(k => (k.pn || '').toUpperCase() === cleanPN) ||
+        newKits.find(k => (k.pn || '').toUpperCase() === cleanPN);
+
+      if (alreadyExists) {
+        skipped++;
+        return;
+      }
+
+      newKits.push({
+        id: uid(),
+        pn: cleanPN,
+        kit: cleanKit,
+        desc: desc.trim(),
+        familia: familia.trim()
+      });
+
       added++;
     });
-    try {
-      await Promise.all(newKits.map(k => window.fsSave(_COL_KITS, k)));
-      kits = [...kits, ...newKits];
-      updateNavCounts();
-      renderKitsTable();
-      toast(`${added} kits importados${skipped ? ', ' + skipped + ' ignorados (já existiam)' : ''}`, 'success');
-    } catch(err) {
-      console.error(err);
-      toast('Erro ao importar kits para o Firestore', 'error');
+
+    if (!newKits.length) {
+      toast(
+        skipped
+          ? `Nenhum kit novo importado. ${skipped} ignorados por duplicidade.`
+          : 'Nenhum kit válido encontrado. Verifique os cabeçalhos da planilha.',
+        'info'
+      );
+      input.value = '';
+      return;
     }
-    input.value = '';
-  };
-  reader.readAsText(file, 'UTF-8');
+
+    await Promise.all(
+      newKits.map(k => window.fsSave(_COL_KITS, k))
+    );
+
+    kits = [...kits, ...newKits];
+
+    updateNavCounts();
+    renderKitsTable();
+
+    toast(
+      `${added} kits importados${skipped ? ', ' + skipped + ' ignorados por duplicidade' : ''}`,
+      'success'
+    );
+
+  } catch (err) {
+    console.error(err);
+    toast('Erro ao importar arquivo Excel/CSV', 'error');
+  }
+
+  input.value = '';
 }
 
 // =====================
