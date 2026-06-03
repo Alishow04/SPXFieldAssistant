@@ -198,6 +198,21 @@ window.fsDelete = async (col, id) => {
   await deleteDoc(doc(db, col, id));
 };
 
+  window.fsSaveBatch = async (col, items) => {
+  const chunkSize = 500;
+
+  for (let i = 0; i < items.length; i += chunkSize) {
+    const batch = writeBatch(db);
+    const chunk = items.slice(i, i + chunkSize);
+
+    chunk.forEach(item => {
+      batch.set(doc(db, col, item.id), item);
+    });
+
+    await batch.commit();
+  }
+};
+
 window.fsSubscribe = (col, callback) => {
   return onSnapshot(collection(db, col), (snap) => {
     callback(snap.docs.map(d => ({ ...d.data(), id: d.id })));
@@ -1486,9 +1501,7 @@ async function importKits(input) {
       return;
     }
 
-    await Promise.all(
-      newKits.map(k => window.fsSave(_COL_KITS, k))
-    );
+    await window.fsSaveBatch(_COL_KITS, newKits);
 
     kits = [...kits, ...newKits];
 
