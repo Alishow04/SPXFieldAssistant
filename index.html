@@ -1256,16 +1256,39 @@ function goToEquips(visitId) {
 // EQUIPAMENTOS
 // =====================
 function renderEquipPage() {
+
+  visits = window.visits || visits || [];
+  equipments = window.equipments || equipments || [];
+  kits = window.kits || kits || [];
+
   const sel = document.getElementById('visit-selector');
+
+  if (!sel) return;
+
   const old = sel.value;
-  sel.innerHTML = '<option value="">-- Selecionar visita --</option>' +
-    visits.map(v => `<option value="${v.id}">${v.cliente} (${formatDate(v.data)})</option>`).join('');
-  if (currentVisitId) {
+
+  sel.innerHTML =
+    '<option value="">-- Selecionar visita --</option>' +
+    visits
+      .slice()
+      .sort((a,b) => (b.data || '').localeCompare(a.data || ''))
+      .map(v =>
+        `<option value="${v.id}">
+          ${v.cliente || 'Cliente sem nome'} (${formatDate(v.data)})
+        </option>`
+      )
+      .join('');
+
+  if (currentVisitId && visits.find(v => v.id === currentVisitId)) {
+
     sel.value = currentVisitId;
     selectVisit(currentVisitId);
-  } else if (old && visits.find(v=>v.id===old)) {
+
+  } else if (old && visits.find(v => v.id === old)) {
+
     sel.value = old;
     selectVisit(old);
+
   }
 }
 
@@ -1779,6 +1802,37 @@ function renderRecommendedParts(equipList) {
 // =====================
 // REPORT
 // =====================
+  
+function renderReportSelectors() {
+
+  visits = window.visits || visits || [];
+  equipments = window.equipments || equipments || [];
+  kits = window.kits || kits || [];
+
+  const sel = document.getElementById('report-visit-selector');
+
+  if (!sel) return;
+
+  sel.innerHTML =
+    '<option value="">-- Selecionar visita --</option>' +
+    visits
+      .slice()
+      .sort((a,b) => (b.data || '').localeCompare(a.data || ''))
+      .map(v =>
+        `<option value="${v.id}">
+          ${v.cliente || 'Cliente sem nome'} (${formatDate(v.data)})
+        </option>`
+      )
+      .join('');
+
+  if (currentVisitId && visits.find(v => v.id === currentVisitId)) {
+
+    sel.value = currentVisitId;
+    renderReport(currentVisitId);
+
+  }
+}
+  
 function renderReport(visitId) {
   const csvBtn = document.getElementById('btn-csv');
   const printBtn = document.getElementById('btn-print');
