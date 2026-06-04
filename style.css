@@ -283,3 +283,17 @@ textarea{resize:vertical;min-height:72px}
 }
 
 </style>
+
+
+<style>
+@media print {
+  .app { display: block; }
+  .topbar,.sidebar,.page-head,.page-actions,
+  .stats-row,.equip-list,.btn,.nav-btn,
+  #visit-selector,#report-visit-selector { display: none !important; }
+  #page-relatorio { display: block !important; padding: 0; }
+  .report-preview { border: none; }
+  .report-header-bar { background: #1e3a6e !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .report-table th { background: #333 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
