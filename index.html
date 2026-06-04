@@ -515,9 +515,31 @@ async function lookupValveSpec(pn) {
   safeSet('e-acabamento', spec.acabamentoSuperficial);
   safeSet('e-especiais', spec.especiais);
   safeSet('e-key', spec.key);
-  safeSet('e-kit', spec.kitReparo || spec.kitVedacao || spec.kit);
-  safeSet('e-unidade-controle', spec.unidadeControle);
-  safeSet('e-kit-adaptador', spec.kitAdaptador);
+  safeSet(
+  'e-kit',
+  spec.kitReparo ||
+  spec.kit_reparo ||
+  spec.kitVedacao ||
+  spec.kit_vedacao ||
+  spec.kit ||
+  ''
+);
+
+safeSet(
+  'e-unidade-controle',
+  spec.unidadeControle ||
+  spec.unid_controle ||
+  spec.unidade_controle ||
+  ''
+);
+
+safeSet(
+  'e-kit-adaptador',
+  spec.kitAdaptador ||
+  spec.kit_adaptador ||
+  spec.adaptador ||
+  ''
+);
 
   // Se encontrou no catálogo técnico, normalmente é uma válvula.
   const tipoEquip = document.getElementById('e-tipo');
