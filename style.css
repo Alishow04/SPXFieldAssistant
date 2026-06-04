@@ -1,4 +1,4 @@
-<style>
+
 
 :root{
   --fiedler-blue:#0054A6;
@@ -296,4 +296,4 @@ textarea{resize:vertical;min-height:72px}
   .report-header-bar { background: #1e3a6e !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .report-table th { background: #333 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
-</style>
+
