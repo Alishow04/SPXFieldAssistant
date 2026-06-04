@@ -1250,6 +1250,37 @@ function renderRecommendedParts(equipList) {
 }
 
 window.renderReportSelectors = renderReportSelectors;
+
+
+function renderReportSelectors() {
+
+  visits = window.visits || visits || [];
+  equipments = window.equipments || equipments || [];
+  kits = window.kits || kits || [];
+
+  const sel = document.getElementById('report-visit-selector');
+
+  if (!sel) return;
+
+  sel.innerHTML =
+    '<option value="">-- Selecionar visita --</option>' +
+    visits
+      .slice()
+      .sort((a,b) => (b.data || '').localeCompare(a.data || ''))
+      .map(v =>
+        `<option value="${v.id}">
+          ${v.cliente || 'Cliente sem nome'} (${formatDate(v.data)})
+        </option>`
+      )
+      .join('');
+
+  if (currentVisitId && visits.find(v => v.id === currentVisitId)) {
+    sel.value = currentVisitId;
+    renderReport(currentVisitId);
+  }
+}
+
+window.renderReportSelectors = renderReportSelectors;
   
 function renderReport(visitId) {
   const csvBtn = document.getElementById('btn-csv');
