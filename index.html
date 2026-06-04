@@ -621,8 +621,15 @@ function openVisitModal(id = null) {
 function saveVisit() {
   const cliente = document.getElementById('v-cliente').value.trim();
   const tecFiedler = document.getElementById('v-tec-fiedler').value.trim();
+
   if (!cliente) { toast('Informe o nome do cliente', 'error'); return; }
   if (!tecFiedler) { toast('Informe o técnico Fiedler', 'error'); return; }
+
+  const oldVisit = editingVisitId
+    ? visits.find(x => x.id === editingVisitId)
+    : null;
+
+  const user = firebase.auth().currentUser;
 
   const data = {
     id: editingVisitId || uid(),
@@ -634,7 +641,18 @@ function saveVisit() {
     tecPlanta: document.getElementById('v-tec-planta').value.trim(),
     tecFiedler,
     obs: document.getElementById('v-obs').value.trim(),
-    criadoEm: editingVisitId ? visits.find(x=>x.id===editingVisitId)?.criadoEm : Date.now()
+
+    criadoEm: editingVisitId
+      ? oldVisit?.criadoEm
+      : Date.now(),
+
+    criadoPorUid: editingVisitId
+      ? oldVisit?.criadoPorUid || ''
+      : user?.uid || '',
+
+    criadoPorEmail: editingVisitId
+      ? oldVisit?.criadoPorEmail || ''
+      : user?.email || ''
   };
 
   if (editingVisitId) {
