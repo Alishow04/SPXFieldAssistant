@@ -1,7 +1,3 @@
-<script type="module">
-// ============================================================
-//  🔥 FIREBASE + AUTH + FIRESTORE
-// ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore,
@@ -307,4 +303,3 @@ onAuthStateChanged(auth, async (user) => {
     await signOut(auth);
   }
 });
-</script>
