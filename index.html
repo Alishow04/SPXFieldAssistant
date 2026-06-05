@@ -456,7 +456,7 @@ function safeGet(id) {
 async function loadValveSpecs() {
   if (valveSpecsLoaded) return valveSpecsLoaded;
 
-  valveSpecsLoaded = fetch('valve_specs.json', { cache: 'force-cache' })
+  valveSpecsLoaded = fetch('valve_specs.json?v=20260605', { cache: 'no-store' })
     .then(res => {
       if (!res.ok) throw new Error('Arquivo valve_specs.json não encontrado');
       return res.json();
