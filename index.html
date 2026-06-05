@@ -911,10 +911,22 @@ let pendingDeleteEquipId = null;
 
 function deleteEquip(id) {
   pendingDeleteEquipId = id;
+
+  const modal = document.getElementById('modal-confirm-delete-equip');
+  modal.style.display = 'flex';
+  modal.classList.add('open');
+}
+  pendingDeleteEquipId = id;
   openModal('modal-confirm-delete-equip');
 }
 
 function cancelDeleteEquip() {
+  pendingDeleteEquipId = null;
+
+  const modal = document.getElementById('modal-confirm-delete-equip');
+  modal.classList.remove('open');
+  modal.style.display = 'none';
+}
   pendingDeleteEquipId = null;
   closeModal('modal-confirm-delete-equip', true);
 }
@@ -933,7 +945,9 @@ async function confirmDeleteEquip() {
 
     pendingDeleteEquipId = null;
 
-    closeModal('modal-confirm-delete-equip', true);
+    const modal = document.getElementById('modal-confirm-delete-equip');
+modal.classList.remove('open');
+modal.style.display = 'none';
 
     updateNavCounts();
 
@@ -1774,7 +1788,7 @@ window.updateNavCounts = updateNavCounts;
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-confirm-delete-equip">
+<div class="modal-overlay" id="modal-confirm-delete-equip" style="display:none">
   <div class="modal" style="max-width:420px">
     <div class="modal-head">
       <div class="modal-title">Excluir equipamento</div>
