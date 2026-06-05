@@ -696,7 +696,7 @@ function saveVisit() {
     ? visits.find(x => x.id === editingVisitId)
     : null;
 
-  const user = firebase.auth().currentUser;
+const user = window.currentUser;
 
   const data = {
     id: editingVisitId || uid(),
