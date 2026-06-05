@@ -662,7 +662,9 @@ function saveVisit() {
     visits.unshift(data);
     toast('Visita criada com sucesso', 'success');
   }
-  saveSingle(_COL_VISITS, data); closeModal('modal-visit'); renderVisits();
+  saveSingle(_COL_VISITS, data);
+closeModal('modal-visit', true);
+renderVisits();
 }
 
 function deleteVisit(id) {
@@ -1609,19 +1611,26 @@ async function clearAll() {
 // =====================
 // UTILS
 // =====================
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+
+function closeModal(id, force = false) {
+  if (!force) {
+    const sair = confirm(
+      'Existem alterações não salvas.\n\nDeseja realmente fechar esta janela?'
+    );
+
+    if (!sair) return;
+  }
+
+  document.getElementById(id).classList.remove('open');
+}
 
 document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => {
     if (e.target === m) {
-      const sair = confirm(
-        'Existem alterações não salvas.\n\nDeseja realmente fechar esta janela?'
-      );
-
-      if (sair) {
-        m.classList.remove('open');
-      }
+      closeModal(m.id);
     }
   });
 });
