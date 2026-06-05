@@ -1611,20 +1611,43 @@ async function clearAll() {
 // =====================
 // UTILS
 // =====================
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-}
+let pendingCloseModalId = null;
 
 function closeModal(id, force = false) {
-  if (!force) {
-    const sair = confirm(
-      'Existem alterações não salvas.\n\nDeseja realmente fechar esta janela?'
-    );
 
-    if (!sair) return;
+  if (force) {
+    document.getElementById(id).classList.remove('open');
+    return;
   }
 
-  document.getElementById(id).classList.remove('open');
+  pendingCloseModalId = id;
+
+  document
+    .getElementById('modal-confirm-close')
+    .classList.add('open');
+}
+
+function cancelPendingClose() {
+  pendingCloseModalId = null;
+
+  document
+    .getElementById('modal-confirm-close')
+    .classList.remove('open');
+}
+
+function confirmPendingClose() {
+
+  if (pendingCloseModalId) {
+    document
+      .getElementById(pendingCloseModalId)
+      .classList.remove('open');
+  }
+
+  pendingCloseModalId = null;
+
+  document
+    .getElementById('modal-confirm-close')
+    .classList.remove('open');
 }
 
 document.querySelectorAll('.modal-overlay').forEach(m => {
@@ -1707,5 +1730,23 @@ window.updateNavCounts = updateNavCounts;
 
 <script type="module" src="firebase.js"></script>
 
+<div class="modal-overlay" id="modal-confirm-close">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <div class="modal-title">Alterações não salvas</div>
+    </div>
+
+    <div class="modal-body">
+      <p>Existem alterações não salvas.</p>
+      <p>Deseja realmente fechar esta janela?</p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cancelPendingClose()">Continuar editando</button>
+      <button class="btn btn-danger" onclick="confirmPendingClose()">Fechar sem salvar</button>
+    </div>
+  </div>
+</div>
+  
 </body>
 </html>
