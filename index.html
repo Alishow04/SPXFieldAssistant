@@ -899,7 +899,7 @@ async function saveEquip() {
       toast('Equipamento salvo', 'success');
     }
     updateNavCounts();
-    closeModal('modal-equip');
+closeModal('modal-equip', true);
     if (currentVisitId) renderEquips(currentVisitId);
   } catch(err) {
     console.error(err);
