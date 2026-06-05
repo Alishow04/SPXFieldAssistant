@@ -19,13 +19,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC9pMg75rju-dzJTXWvfja1Sd8Ox5WGenw",
-  authDomain: "spx-field-assistant.firebaseapp.com",
-  projectId: "spx-field-assistant",
-  storageBucket: "spx-field-assistant.firebasestorage.app",
-  messagingSenderId: "490242862861",
-  appId: "1:490242862861:web:ef6e9ed689ffd51f8c8a44",
-  measurementId: "G-HS00TQKZMR"
+  apiKey: "AIzaSyBsxgboiE95vtGRWGya4R74sAW5auqFnDg",
+  authDomain: "spx-field-assistant-v2.firebaseapp.com",
+  projectId: "spx-field-assistant-v2",
+  storageBucket: "spx-field-assistant-v2.firebasestorage.app",
+  messagingSenderId: "783194764099",
+  appId: "1:783194764099:web:fc103f085bda19a2e3f5f6",
+  measurementId: "G-BRW948QJ09"
 };
 // ============================================================
 
