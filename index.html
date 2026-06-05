@@ -525,6 +525,15 @@ async function lookupEquipmentData(pn) {
   await lookupValveSpec(pn);
 }
 
+function pickSpec(spec, keys) {
+  for (const key of keys) {
+    if (spec[key] !== undefined && spec[key] !== null && String(spec[key]).trim() !== '') {
+      return spec[key];
+    }
+  }
+  return '';
+}
+  
 async function lookupValveSpec(pn) {
   const clean = normalizePN(pn);
   const res = document.getElementById('spec-lookup-result');
@@ -561,33 +570,42 @@ async function lookupValveSpec(pn) {
 
   safeSet(
   'e-kit',
-  spec.pn_kit_vedacao ||
-  spec.kit_vedacao ||
-  spec.kitVedacao ||
-  spec.kitReparo ||
-  spec.kit_reparo ||
-  spec.kit ||
-  ''
+  pickSpec(spec, [
+    'pn_kit_vedacao',
+    'pn_kit_vedação',
+    'kit_vedacao',
+    'kit_vedação',
+    'kit_reparo',
+    'kitreparo',
+    'kitvedacao',
+    'kit',
+    'reparo'
+  ])
 );
 
 safeSet(
   'e-unidade-controle',
-  spec.pn_unidade_cont ||
-  spec.pn_unidade_controle ||
-  spec.unid_controle ||
-  spec.unidadeControle ||
-  spec.unidade_controle ||
-  ''
+  pickSpec(spec, [
+    'pn_unidade_cont',
+    'pn_unidade_controle',
+    'unid_controle',
+    'unidade_controle',
+    'unidadecontrole',
+    'controle_kit',
+    'kit_controle'
+  ])
 );
 
 safeSet(
   'e-kit-adaptador',
-  spec.pn_kit_adapt ||
-  spec.pn_kit_adaptador ||
-  spec.kitAdaptador ||
-  spec.kit_adaptador ||
-  spec.adaptador ||
-  ''
+  pickSpec(spec, [
+    'pn_kit_adapt',
+    'pn_kit_adaptador',
+    'kit_adapt',
+    'kit_adaptador',
+    'kitadaptador',
+    'adaptador'
+  ])
 );
 
   const tipoEquip = document.getElementById('e-tipo');
