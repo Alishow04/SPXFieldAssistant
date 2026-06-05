@@ -502,7 +502,7 @@ async function lookupValveSpec(pn) {
     return;
   }
 
-  safeSet('e-desc', spec.descricao || spec.description || spec.desc || '');
+  safeSet('e-desc', spec.descricao || spec.descrição || spec.description || spec.desc || '');
   safeSet('e-modelo', spec.modelo || spec.model || '');
   safeSet('e-valve-tipo', spec.valveTipo || spec.tipo || spec.tipo_tecnico || '');
   safeSet('e-bitola', spec.bitola || spec.tamanho || spec.size || '');
@@ -516,30 +516,33 @@ async function lookupValveSpec(pn) {
   safeSet('e-key', spec.key || spec.KEY || '');
 
   safeSet(
-    'e-kit',
-    spec.kitReparo ||
-    spec.kit_reparo ||
-    spec.kitVedacao ||
-    spec.kit_vedacao ||
-    spec.kit ||
-    ''
-  );
+  'e-kit',
+  spec.kitReparo ||
+  spec.kit_reparo ||
+  spec.kitVedacao ||
+  spec.kit_vedacao ||
+  spec.pn_kit_vedacao ||
+  spec.kit ||
+  ''
+);
+
+ safeSet(
+  'e-unidade-controle',
+  spec.unidadeControle ||
+  spec.unid_controle ||
+  spec.unidade_controle ||
+  spec.pn_unidade_cont ||
+  ''
+);
 
   safeSet(
-    'e-unidade-controle',
-    spec.unidadeControle ||
-    spec.unid_controle ||
-    spec.unidade_controle ||
-    ''
-  );
-
-  safeSet(
-    'e-kit-adaptador',
-    spec.kitAdaptador ||
-    spec.kit_adaptador ||
-    spec.adaptador ||
-    ''
-  );
+  'e-kit-adaptador',
+  spec.kitAdaptador ||
+  spec.kit_adaptador ||
+  spec.adaptador ||
+  spec.pn_kit_adapt ||
+  ''
+);
 
   const tipoEquip = document.getElementById('e-tipo');
   if (tipoEquip && !tipoEquip.value) tipoEquip.value = 'Válvula';
