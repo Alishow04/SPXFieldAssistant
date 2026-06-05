@@ -452,18 +452,63 @@ function safeGet(id) {
   return el ? el.value.trim() : '';
 }
 
+function normalizeJsonKey(key) {
+  return String(key || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
 async function loadValveSpecs() {
   if (valveSpecsLoaded) return valveSpecsLoaded;
 
-  valveSpecsLoaded = fetch('valve_specs.json?v=20260605', { cache: 'no-store' })
+  valveSpecsLoaded = fetch('valve_specs.json?v=20260605-3', { cache: 'no-store' })
     .then(res => {
       if (!res.ok) throw new Error('Arquivo valve_specs.json não encontrado');
       return res.json();
     })
     .then(data => {
-      valveSpecs = data || {};
+      const indexed = {};
+
+      const entries = Array.isArray(data)
+        ? data.map((row, i) => [String(i), row])
+        : Object.entries(data || {});
+
+      entries.forEach(([jsonKey, row]) => {
+        if (!row || typeof row !== 'object') return;
+
+        const normalized = {};
+
+        Object.keys(row).forEach(k => {
+          normalized[normalizeJsonKey(k)] = row[k];
+        });
+
+        const pn = normalizePN(
+          normalized.part_number ||
+          normalized.partnumber ||
+          normalized.pn ||
+          normalized.codigo ||
+          jsonKey
+        );
+
+        if (!pn) return;
+
+        indexed[pn] = {
+          ...row,
+          ...normalized,
+          pn
+        };
+      });
+
+      valveSpecs = indexed;
       window.valveSpecs = valveSpecs;
+
       console.log('Catálogo técnico carregado:', Object.keys(valveSpecs).length, 'válvulas');
+      console.log('Exemplo catálogo:', valveSpecs[Object.keys(valveSpecs)[0]]);
+
       return valveSpecs;
     })
     .catch(err => {
