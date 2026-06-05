@@ -1630,6 +1630,7 @@ function closeModal(id, force = false) {
 document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => {
     if (e.target === m) {
+      alert('CLIQUE FORA DETECTADO');
       closeModal(m.id);
     }
   });
