@@ -279,7 +279,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-visit')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveVisit()">Salvar visita</button>
+<button class="btn btn-primary" onclick="event.stopPropagation(); saveVisit()">Salvar visita</button>
     </div>
   </div>
 </div>
@@ -362,7 +362,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-equip')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveEquip()">Salvar equipamento</button>
+      <button class="btn btn-primary" onclick="event.stopPropagation(); saveEquip()">Salvar equipamento</button>
     </div>
   </div>
 </div>
@@ -1640,6 +1640,22 @@ function confirmPendingClose() {
   pendingCloseModalId = null;
   document.getElementById('modal-confirm-close').classList.remove('open');
 }
+
+document.querySelectorAll('.modal-overlay').forEach(function(m) {
+
+  m.addEventListener('click', function(e) {
+
+    if (m.id === 'modal-confirm-close') {
+      return;
+    }
+
+    if (e.target === m) {
+      closeModal(m.id);
+    }
+
+  });
+
+});
 
 function toast(msg, type = 'info') {
   const wrap = document.getElementById('toast-wrap');
