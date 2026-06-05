@@ -907,29 +907,7 @@ closeModal('modal-equip', true);
   }
 }
 
-let pendingDeleteEquipId = null;
 
-function deleteEquip(id) {
-  pendingDeleteEquipId = id;
-
-  const modal = document.getElementById('modal-confirm-delete-equip');
-  modal.style.display = 'flex';
-  modal.classList.add('open');
-}
-  pendingDeleteEquipId = id;
-  openModal('modal-confirm-delete-equip');
-}
-
-function cancelDeleteEquip() {
-  pendingDeleteEquipId = null;
-
-  const modal = document.getElementById('modal-confirm-delete-equip');
-  modal.classList.remove('open');
-  modal.style.display = 'none';
-}
-  pendingDeleteEquipId = null;
-  closeModal('modal-confirm-delete-equip', true);
-}
 
 async function confirmDeleteEquip() {
 
@@ -1303,70 +1281,51 @@ function renderRecommendedParts(equipList) {
     renderReport(currentVisitId);
   }
 }
+
+  let pendingDeleteEquipId = null;
+
+function deleteEquip(id) {
+  pendingDeleteEquipId = id;
+
+  const modal = document.getElementById('modal-confirm-delete-equip');
+  modal.style.display = 'flex';
+  modal.classList.add('open');
+}
+
+function cancelDeleteEquip() {
+  pendingDeleteEquipId = null;
+
+  const modal = document.getElementById('modal-confirm-delete-equip');
+  modal.classList.remove('open');
+  modal.style.display = 'none';
+}
+
+async function confirmDeleteEquip() {
+  if (!pendingDeleteEquipId) return;
+
+  try {
+    await window.fsDelete(_COL_EQUIPS, pendingDeleteEquipId);
+
+    equipments = equipments.filter(e => e.id !== pendingDeleteEquipId);
+    pendingDeleteEquipId = null;
+
+    const modal = document.getElementById('modal-confirm-delete-equip');
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+
+    updateNavCounts();
+    if (currentVisitId) renderEquips(currentVisitId);
+
+    toast('Equipamento excluído', 'info');
+  } catch(err) {
+    console.error(err);
+    toast('Erro ao excluir equipamento', 'error');
+  }
+}
 // =====================
 // REPORT
 // =====================
 
-  function renderReportSelectors() {
-
-  visits = window.visits || visits || [];
-  equipments = window.equipments || equipments || [];
-  kits = window.kits || kits || [];
-
-  const sel = document.getElementById('report-visit-selector');
-
-  if (!sel) return;
-
-  sel.innerHTML =
-    '<option value="">-- Selecionar visita --</option>' +
-    visits
-      .slice()
-      .sort((a,b) => (b.data || '').localeCompare(a.data || ''))
-      .map(v =>
-        `<option value="${v.id}">
-          ${v.cliente || 'Cliente sem nome'} (${formatDate(v.data)})
-        </option>`
-      )
-      .join('');
-
-  if (currentVisitId && visits.find(v => v.id === currentVisitId)) {
-    sel.value = currentVisitId;
-    renderReport(currentVisitId);
-  }
-}
-
-window.renderReportSelectors = renderReportSelectors;
-
-
-function renderReportSelectors() {
-
-  visits = window.visits || visits || [];
-  equipments = window.equipments || equipments || [];
-  kits = window.kits || kits || [];
-
-  const sel = document.getElementById('report-visit-selector');
-
-  if (!sel) return;
-
-  sel.innerHTML =
-    '<option value="">-- Selecionar visita --</option>' +
-    visits
-      .slice()
-      .sort((a,b) => (b.data || '').localeCompare(a.data || ''))
-      .map(v =>
-        `<option value="${v.id}">
-          ${v.cliente || 'Cliente sem nome'} (${formatDate(v.data)})
-        </option>`
-      )
-      .join('');
-
-  if (currentVisitId && visits.find(v => v.id === currentVisitId)) {
-    sel.value = currentVisitId;
-    renderReport(currentVisitId);
-  }
-}
-
-window.renderReportSelectors = renderReportSelectors;
   
 function renderReport(visitId) {
   const csvBtn = document.getElementById('btn-csv');
@@ -1765,6 +1724,20 @@ window.renderEquipPage = renderEquipPage;
 window.renderReportSelectors = renderReportSelectors;
 window.renderKitsTable = renderKitsTable;
 window.updateNavCounts = updateNavCounts;
+
+window.openVisitModal = openVisitModal;
+window.saveVisit = saveVisit;
+window.closeModal = closeModal;
+window.openModal = openModal;
+
+window.openEquipModal = openEquipModal;
+window.saveEquip = saveEquip;
+window.deleteEquip = deleteEquip;
+
+window.cancelPendingClose = cancelPendingClose;
+window.confirmPendingClose = confirmPendingClose;
+window.cancelDeleteEquip = cancelDeleteEquip;
+window.confirmDeleteEquip = confirmDeleteEquip;
   
 </script>
 
