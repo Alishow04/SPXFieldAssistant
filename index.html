@@ -1774,26 +1774,25 @@ window.updateNavCounts = updateNavCounts;
   </div>
 </div>
 
-  <div class="modal-body">
-      <p>Tem certeza que deseja excluir este equipamento?</p>
+<div class="modal-overlay" id="modal-confirm-delete-equip">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <div class="modal-title">Excluir equipamento</div>
+    </div>
 
+    <div class="modal-body">
+      <p>Tem certeza que deseja excluir este equipamento?</p>
       <p style="color:var(--text2);font-size:13px">
         Esta ação não poderá ser desfeita.
       </p>
     </div>
 
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="cancelDeleteEquip()">
-        Cancelar
-      </button>
-
-      <button class="btn btn-danger" onclick="confirmDeleteEquip()">
-        Excluir equipamento
-      </button>
+      <button class="btn btn-ghost" onclick="cancelDeleteEquip()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmDeleteEquip()">Excluir equipamento</button>
     </div>
-
   </div>
 </div>
-  
+
 </body>
 </html>
