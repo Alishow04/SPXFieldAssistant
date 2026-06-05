@@ -907,14 +907,42 @@ closeModal('modal-equip', true);
   }
 }
 
-async function deleteEquip(id) {
-  if (!confirm('Excluir este equipamento?')) return;
+let pendingDeleteEquipId = null;
+
+function deleteEquip(id) {
+  pendingDeleteEquipId = id;
+  openModal('modal-confirm-delete-equip');
+}
+
+function cancelDeleteEquip() {
+  pendingDeleteEquipId = null;
+  closeModal('modal-confirm-delete-equip', true);
+}
+
+async function confirmDeleteEquip() {
+
+  if (!pendingDeleteEquipId) return;
+
   try {
-    await window.fsDelete(_COL_EQUIPS, id);
-    equipments = equipments.filter(e => e.id !== id);
+
+    await window.fsDelete(_COL_EQUIPS, pendingDeleteEquipId);
+
+    equipments = equipments.filter(
+      e => e.id !== pendingDeleteEquipId
+    );
+
+    pendingDeleteEquipId = null;
+
+    closeModal('modal-confirm-delete-equip', true);
+
     updateNavCounts();
-    if (currentVisitId) renderEquips(currentVisitId);
+
+    if (currentVisitId) {
+      renderEquips(currentVisitId);
+    }
+
     toast('Equipamento excluído', 'info');
+
   } catch(err) {
     console.error(err);
     toast('Erro ao excluir equipamento', 'error');
@@ -1743,6 +1771,27 @@ window.updateNavCounts = updateNavCounts;
       <button class="btn btn-ghost" onclick="cancelPendingClose()">Continuar editando</button>
       <button class="btn btn-danger" onclick="confirmPendingClose()">Fechar sem salvar</button>
     </div>
+  </div>
+</div>
+
+  <div class="modal-body">
+      <p>Tem certeza que deseja excluir este equipamento?</p>
+
+      <p style="color:var(--text2);font-size:13px">
+        Esta ação não poderá ser desfeita.
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cancelDeleteEquip()">
+        Cancelar
+      </button>
+
+      <button class="btn btn-danger" onclick="confirmDeleteEquip()">
+        Excluir equipamento
+      </button>
+    </div>
+
   </div>
 </div>
   
