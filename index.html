@@ -502,45 +502,45 @@ async function lookupValveSpec(pn) {
     return;
   }
 
-  safeSet('e-desc', spec.descricao);
-  safeSet('e-modelo', spec.modelo);
-  safeSet('e-valve-tipo', spec.valveTipo);
-  safeSet('e-bitola', spec.bitola);
-  safeSet('e-vedacao', spec.materialVedacao);
-  safeSet('e-posicao-atuador', spec.posicaoAtuador);
-  safeSet('e-atuador', spec.atuador);
-  safeSet('e-controle', spec.controle);
-  safeSet('e-conexoes', spec.conexoes);
-  safeSet('e-acabamento', spec.acabamentoSuperficial);
-  safeSet('e-especiais', spec.especiais);
-  safeSet('e-key', spec.key);
+  safeSet('e-desc', spec.descricao || spec.description || spec.desc || '');
+  safeSet('e-modelo', spec.modelo || spec.model || '');
+  safeSet('e-valve-tipo', spec.valveTipo || spec.tipo || spec.tipo_tecnico || '');
+  safeSet('e-bitola', spec.bitola || spec.tamanho || spec.size || '');
+  safeSet('e-vedacao', spec.materialVedacao || spec.material_vedacao || spec.vedacao || '');
+  safeSet('e-posicao-atuador', spec.posicaoAtuador || spec.posicao_atuador || '');
+  safeSet('e-atuador', spec.atuador || spec.acionamento || '');
+  safeSet('e-controle', spec.controle || '');
+  safeSet('e-conexoes', spec.conexoes || spec.conexão || spec.conexao || '');
+  safeSet('e-acabamento', spec.acabamentoSuperficial || spec.acabamento_superficial || spec.acabamento || '');
+  safeSet('e-especiais', spec.especiais || '');
+  safeSet('e-key', spec.key || spec.KEY || '');
+
   safeSet(
-  'e-kit',
-  spec.kitReparo ||
-  spec.kit_reparo ||
-  spec.kitVedacao ||
-  spec.kit_vedacao ||
-  spec.kit ||
-  ''
-);
+    'e-kit',
+    spec.kitReparo ||
+    spec.kit_reparo ||
+    spec.kitVedacao ||
+    spec.kit_vedacao ||
+    spec.kit ||
+    ''
+  );
 
-safeSet(
-  'e-unidade-controle',
-  spec.unidadeControle ||
-  spec.unid_controle ||
-  spec.unidade_controle ||
-  ''
-);
+  safeSet(
+    'e-unidade-controle',
+    spec.unidadeControle ||
+    spec.unid_controle ||
+    spec.unidade_controle ||
+    ''
+  );
 
-safeSet(
-  'e-kit-adaptador',
-  spec.kitAdaptador ||
-  spec.kit_adaptador ||
-  spec.adaptador ||
-  ''
-);
+  safeSet(
+    'e-kit-adaptador',
+    spec.kitAdaptador ||
+    spec.kit_adaptador ||
+    spec.adaptador ||
+    ''
+  );
 
-  // Se encontrou no catálogo técnico, normalmente é uma válvula.
   const tipoEquip = document.getElementById('e-tipo');
   if (tipoEquip && !tipoEquip.value) tipoEquip.value = 'Válvula';
 
@@ -549,7 +549,7 @@ safeSet(
 
   if (res) {
     res.style.display = 'block';
-    res.innerHTML = `<div class="tech-found">Catálogo técnico encontrado: ${spec.descricao || 'Válvula'} ${spec.modelo ? '· ' + spec.modelo : ''}${spec.bitola ? ' · ' + spec.bitola : ''}</div>`;
+    res.innerHTML = `<div class="tech-found">Catálogo técnico encontrado: ${spec.descricao || spec.description || 'Válvula'} ${spec.modelo || spec.model ? '· ' + (spec.modelo || spec.model) : ''}${spec.bitola || spec.tamanho ? ' · ' + (spec.bitola || spec.tamanho) : ''}</div>`;
   }
 }
 
