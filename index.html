@@ -54,7 +54,9 @@
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
-  <div class="brand-panel"><img src="logo-fiedler-negativa.png" alt="FIEDLER Automação Industrial" class="brand-logo"></div>
+  <div class="brand-panel" onclick="navigate('dashboard')" title="Ir para o dashboard">
+  <img src="logo-fiedler-negativa.png" alt="FIEDLER Automação Industrial" class="brand-logo">
+</div>
   <div class="nav-section">Visitas</div>
   <button class="nav-btn active" onclick="navigate('visitas')" id="nav-visitas">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -85,8 +87,61 @@
 <!-- MAIN CONTENT -->
 <main class="main">
 
+<!-- PAGE: DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="dashboard-hero">
+    <div>
+      <div class="dashboard-kicker">SPX Field Assistant</div>
+      <div class="dashboard-title">Dashboard Fiedler</div>
+      <div class="dashboard-sub">Resumo das visitas PLA, equipamentos e peças recomendadas.</div>
+    </div>
+    <div class="dashboard-actions">
+      <button class="btn btn-primary" onclick="openVisitModal()">Nova visita</button>
+      <button class="btn btn-secondary" onclick="navigate('relatorio')">Gerar relatório</button>
+    </div>
+  </div>
+
+  <div class="dashboard-stats">
+    <div class="dash-stat"><div class="dash-stat-icon">📋</div><div><strong id="dash-visits">0</strong><span>Visitas cadastradas</span></div></div>
+    <div class="dash-stat"><div class="dash-stat-icon">⚙️</div><div><strong id="dash-equips">0</strong><span>Equipamentos</span></div></div>
+    <div class="dash-stat"><div class="dash-stat-icon">🔧</div><div><strong id="dash-kits">0</strong><span>Kits identificados</span></div></div>
+    <div class="dash-stat"><div class="dash-stat-icon warn">!</div><div><strong id="dash-defeitos">0</strong><span>Com defeito</span></div></div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="dash-card span2">
+      <div class="dash-card-head">
+        <div>
+          <h3>Visitas recentes</h3>
+          <p>Últimos atendimentos registrados</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="navigate('visitas')">Ver visitas</button>
+      </div>
+      <div id="dash-recent-visits"></div>
+    </div>
+
+    <div class="dash-card">
+      <h3>Equipamentos por tipo</h3>
+      <p>Distribuição da base instalada</p>
+      <div id="dash-type-bars" class="dash-bars"></div>
+    </div>
+
+    <div class="dash-card">
+      <h3>Top clientes</h3>
+      <p>Clientes com mais equipamentos</p>
+      <div id="dash-top-clients"></div>
+    </div>
+
+    <div class="dash-card span2">
+      <h3>Peças recomendadas</h3>
+      <p>Consolidação dos códigos de reparo cadastrados nos equipamentos</p>
+      <div id="dash-parts-summary"></div>
+    </div>
+  </div>
+</div>
+  
 <!-- PAGE: VISITAS -->
-<div class="page active" id="page-visitas">
+<div class="page" id="page-visitas">
   <div class="page-head">
     <div class="page-title">Visitas PLA</div>
     <div class="page-sub">Gerencie as visitas de levantamento de base instalada</div>
@@ -434,6 +489,7 @@ window._appInit = function() {
   kits       = window.kits;
   updateNavCounts();
   renderVisits();
+  renderDashboard();
   loadValveSpecs();
 };
 
@@ -639,6 +695,154 @@ function collectTechnicalFields() {
   };
 }
 
+
+
+function renderDashboard() {
+  const eq = equipments || [];
+  const vs = visits || [];
+
+  const kitsOk = eq.filter(e => {
+    const kit = e.kitReparo || e.kit;
+    return kit && kit !== 'consultar';
+  }).length;
+
+  const defeitos = eq.filter(e => e.cond === 'Com defeito').length;
+
+  safeText('dash-visits', vs.length);
+  safeText('dash-equips', eq.length);
+  safeText('dash-kits', kitsOk);
+  safeText('dash-defeitos', defeitos);
+
+  renderDashboardRecentVisits(vs);
+  renderDashboardTypes(eq);
+  renderDashboardClients(eq, vs);
+  renderDashboardParts(eq);
+}
+
+function safeText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+function renderDashboardRecentVisits(vs) {
+  const el = document.getElementById('dash-recent-visits');
+  if (!el) return;
+
+  const recent = vs.slice()
+    .sort((a,b) => (b.data || '').localeCompare(a.data || ''))
+    .slice(0,5);
+
+  if (!recent.length) {
+    el.innerHTML = `<div class="dash-empty">Nenhuma visita cadastrada ainda.</div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <table class="dash-table">
+      <thead><tr><th>Data</th><th>Cliente</th><th>Local</th><th>Equip.</th></tr></thead>
+      <tbody>
+        ${recent.map(v => {
+          const qtd = equipments.filter(e => e.visitId === v.id).length;
+          return `<tr onclick="goToEquips('${v.id}')">
+            <td>${formatDate(v.data)}</td>
+            <td><strong>${escapeHtml(v.cliente || '—')}</strong></td>
+            <td>${escapeHtml(v.cidade || '—')}${v.estado ? '/' + escapeHtml(v.estado) : ''}</td>
+            <td><span class="badge badge-blue">${qtd}</span></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+function renderDashboardTypes(eq) {
+  const el = document.getElementById('dash-type-bars');
+  if (!el) return;
+
+  const groups = {};
+  eq.forEach(e => {
+    const tipo = e.tipo || 'Outro';
+    groups[tipo] = (groups[tipo] || 0) + 1;
+  });
+
+  const max = Math.max(...Object.values(groups), 1);
+
+  if (!eq.length) {
+    el.innerHTML = `<div class="dash-empty">Nenhum equipamento cadastrado.</div>`;
+    return;
+  }
+
+  el.innerHTML = Object.entries(groups)
+    .sort((a,b) => b[1] - a[1])
+    .map(([tipo, qtd]) => `
+      <div class="dash-bar-row">
+        <div class="dash-bar-label"><span>${escapeHtml(tipo)}</span><strong>${qtd}</strong></div>
+        <div class="dash-bar"><i style="width:${Math.max(8, qtd / max * 100)}%"></i></div>
+      </div>
+    `).join('');
+}
+
+function renderDashboardClients(eq, vs) {
+  const el = document.getElementById('dash-top-clients');
+  if (!el) return;
+
+  const byVisit = {};
+  vs.forEach(v => byVisit[v.id] = v);
+
+  const groups = {};
+  eq.forEach(e => {
+    const v = byVisit[e.visitId];
+    const cliente = v?.cliente || 'Sem cliente';
+    groups[cliente] = (groups[cliente] || 0) + 1;
+  });
+
+  const top = Object.entries(groups).sort((a,b) => b[1] - a[1]).slice(0,5);
+
+  if (!top.length) {
+    el.innerHTML = `<div class="dash-empty">Sem dados suficientes.</div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="dash-client-list">
+    ${top.map(([cliente, qtd]) => `
+      <div class="dash-client-item">
+        <span>${escapeHtml(cliente)}</span>
+        <strong>${qtd}</strong>
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+function renderDashboardParts(eq) {
+  const el = document.getElementById('dash-parts-summary');
+  if (!el) return;
+
+  const parts = typeof buildRecommendedParts === 'function'
+    ? buildRecommendedParts(eq).slice(0,8)
+    : [];
+
+  if (!parts.length) {
+    el.innerHTML = `<div class="dash-empty">Nenhuma peça recomendada identificada.</div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <table class="dash-table">
+      <thead><tr><th>Tipo</th><th>Código</th><th>Qtd</th></tr></thead>
+      <tbody>
+        ${parts.map(p => `
+          <tr>
+            <td>${escapeHtml(p.tipo)}</td>
+            <td><strong>${escapeHtml(p.codigo)}</strong></td>
+            <td><span class="badge badge-green">${p.qtd}</span></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>`;
+}
+
+
+
+  
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
 // =====================
@@ -655,10 +859,12 @@ function navigate(page) {
   document.getElementById('page-' + page).classList.add('active');
   document.getElementById('nav-' + page).classList.add('active');
 
+  if (page === 'dashboard') renderDashboard();
   if (page === 'visitas') renderVisits();
   if (page === 'equipamentos') renderEquipPage();
   if (page === 'relatorio') renderReportSelectors();
   if (page === 'kits') renderKitsTable();
+  
 }
 
 function updateNavCounts() {
