@@ -1613,41 +1613,32 @@ async function clearAll() {
 // =====================
 let pendingCloseModalId = null;
 
-function closeModal(id, force = false) {
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
 
+function closeModal(id, force = false) {
   if (force) {
     document.getElementById(id).classList.remove('open');
     return;
   }
 
   pendingCloseModalId = id;
-
-  document
-    .getElementById('modal-confirm-close')
-    .classList.add('open');
+  document.getElementById('modal-confirm-close').classList.add('open');
 }
 
 function cancelPendingClose() {
   pendingCloseModalId = null;
-
-  document
-    .getElementById('modal-confirm-close')
-    .classList.remove('open');
+  document.getElementById('modal-confirm-close').classList.remove('open');
 }
 
 function confirmPendingClose() {
-
   if (pendingCloseModalId) {
-    document
-      .getElementById(pendingCloseModalId)
-      .classList.remove('open');
+    document.getElementById(pendingCloseModalId).classList.remove('open');
   }
 
   pendingCloseModalId = null;
-
-  document
-    .getElementById('modal-confirm-close')
-    .classList.remove('open');
+  document.getElementById('modal-confirm-close').classList.remove('open');
 }
 
   });
