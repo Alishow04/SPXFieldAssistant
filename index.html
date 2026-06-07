@@ -2706,7 +2706,7 @@ function showEquipHistory(pn) {
 
   const body = document.getElementById('modal-history-body');
   body.innerHTML = `
-    <p style="font-size:13px;color:var(--text2);margin:16px 0 12px">Este Part Number aparece em <strong>${matches.length}</strong> visitas:</p>
+    <p style="font-size:13px;color:var(--text2);margin:16px 0 12px">Este Part Number aparece em <strong>${matches.length}</strong> inclusões:</p>
     <div style="display:flex;flex-direction:column;gap:0">
     ${matches.map(e => {
       const v = visits.find(x => x.id === e.visitId);
