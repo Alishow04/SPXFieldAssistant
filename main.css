@@ -305,15 +305,38 @@ textarea{resize:vertical;min-height:72px}
 }
 
 /* ── DESKTOP HOVER EXPAND on collapsed ── */
-@media(min-width:769px){
-  .app.sb-collapsed .sidebar:hover{width:260px;padding:22px 10px}
-  .app.sb-collapsed .sidebar:hover .brand-logo{display:block}
-  .app.sb-collapsed .sidebar:hover .brand-logo-compact{display:none}
-  .app.sb-collapsed .sidebar:hover .nav-label{display:inline}
-  .app.sb-collapsed .sidebar:hover .nav-section .nav-section-label{display:inline}
-  .app.sb-collapsed .sidebar:hover .nav-section{padding:14px 12px 7px;font-size:10px;letter-spacing:.14em}
-  .app.sb-collapsed .sidebar:hover .nav-btn{padding:12px 13px;justify-content:flex-start;gap:12px}
-  .app.sb-collapsed .sidebar:hover .nav-count{position:static;background:rgba(255,255,255,.13);color:#fff;font-size:11px;padding:2px 8px;min-width:auto;height:auto;line-height:inherit}
+@media (min-width: 769px) {
+  .app.sb-collapsed .sidebar:hover {
+    width: 260px;
+    /* não alterar padding aqui */
+  }
+
+  .app.sb-collapsed .sidebar:hover .brand-logo {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .app.sb-collapsed .sidebar:hover .brand-logo-compact {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .app.sb-collapsed .sidebar:hover .nav-label,
+  .app.sb-collapsed .sidebar:hover .nav-section .nav-section-label {
+    opacity: 1;
+    visibility: visible;
+    width: auto;
+  }
+
+  .app.sb-collapsed .sidebar:hover .nav-btn {
+    /* não alterar padding vertical */
+    justify-content: flex-start;
+  }
+
+  .app.sb-collapsed .sidebar:hover .nav-count {
+    opacity: 1;
+    visibility: visible;
+  }
 }
 
 /* ── MOBILE (<768px): sidebar oculta, hambúrguer ── */
