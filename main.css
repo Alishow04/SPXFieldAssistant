@@ -77,12 +77,21 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);fo
 .sidebar::after{content:"";position:absolute;left:-50px;bottom:-70px;width:360px;height:220px;border:1px solid rgba(255,242,0,.26);border-radius:50%;transform:rotate(-12deg);pointer-events:none}
 
 .sidebar-toggle{
-  position:absolute;top:18px;right:-13px;
-  width:26px;height:26px;
-  background:#0054A6;border:2px solid rgba(255,255,255,.22);
-  border-radius:50%;color:#fff;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  z-index:300;transition:transform .2s,background .15s;
+  position:absolute;
+  top:18px;
+  right:10px;
+  width:26px;
+  height:26px;
+  background:#0054A6;
+  border:2px solid rgba(255,255,255,.22);
+  border-radius:50%;
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:300;
+  transition:transform .2s,background .15s;
   box-shadow:0 2px 8px rgba(0,0,0,.25);
 }
 .sidebar-toggle:hover{background:#1C4A8A}
