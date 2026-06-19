@@ -176,7 +176,10 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);fo
 .nav-btn.active svg{opacity:1;color:var(--fiedler-yellow)}
 .nav-label{transition:opacity .15s}
 .nav-count{margin-left:auto;font-family:var(--font-mono);font-size:11px;background:rgba(255,255,255,.13);color:#fff;padding:2px 8px;border-radius:999px;transition:all .2s;flex-shrink:0}
-
+/* Oculta os contadores do menu lateral */
+.nav-count{
+  display:none !important;
+}
 .main{grid-column:2;grid-row:2;overflow-y:auto;background:var(--bg)}
 .page{display:none;padding:32px 34px;animation:fadeIn .2s ease}
 .page.active{display:block}
