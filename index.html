@@ -2136,9 +2136,15 @@ function navigate(page) {
 }
 
 function updateNavCounts() {
-  document.getElementById('cnt-visitas').textContent = visits.length;
-  document.getElementById('cnt-equips').textContent = sumQtd(equipments);
-  document.getElementById('cnt-kits').textContent = kits.length;
+
+  const cntVisitas = document.getElementById('cnt-visitas');
+  const cntEquips  = document.getElementById('cnt-equips');
+  const cntKits    = document.getElementById('cnt-kits');
+
+  if (cntVisitas) cntVisitas.textContent = visits.length;
+  if (cntEquips)  cntEquips.textContent = sumQtd(equipments);
+  if (cntKits)    cntKits.textContent = kits.length;
+
 }
 
 // =====================
