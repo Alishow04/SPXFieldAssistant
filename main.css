@@ -124,7 +124,11 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);fo
   overflow:hidden;
 }
 .app.sb-collapsed .nav-section{padding:10px 0;text-align:center;letter-spacing:0;font-size:0}
-.app.sb-collapsed .nav-btn{padding:11px;justify-content:center;gap:0}
+.app.sb-collapsed .nav-btn{
+  padding:11px 13px;
+  justify-content:flex-start;
+  gap:12px;
+}
 .app.sb-collapsed .nav-count{
   position:absolute;top:3px;right:3px;
   min-width:15px;height:15px;padding:0 3px;
