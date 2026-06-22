@@ -3672,7 +3672,7 @@ function renderRecommendedParts(equipList, footer) {
 
   return `
     <div class="recommended-summary" style="page-break-before:always;break-before:page;display:flex;flex-direction:column;min-height:0">
-      <div class="recommended-title">Resumo de peças recomendadas</div>
+      <div class="recommended-title">Resumo de peças</div>
       <table class="recommended-table">
         <thead>
           <tr>
@@ -4270,7 +4270,7 @@ function exportCSV() {
     header.join(';'),
     ...rows.map(r => r.map(x => String(x).replaceAll(';', ',')).join(';')),
     [],
-    ['Resumo de peças recomendadas'],
+    ['Resumo de peças'],
     ['Tipo', 'Cód. SPX', 'Cód. Fiedler', 'Descrição', 'Quantidade'].join(';'),
     ...partsRows.map(r => r.join(';'))
   ].join('\r\n');
