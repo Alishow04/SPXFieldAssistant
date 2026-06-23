@@ -1796,17 +1796,7 @@ textarea{resize:vertical;min-height:72px}
   }
 }
 
-/* Texto SPX estilizado no título do login */
-.spx-logo-text{
-  display:inline-block;
-  margin-left:8px;
-  font-family:var(--font-head);
-  font-weight:900;
-  font-style:italic;
-  letter-spacing:-0.06em;
-  line-height:1;
-  white-space:nowrap;
-}
+
 
 /* ══════════════════════════════════════════════
    LOGIN FIX - ÍCONE FIEDLER QUADRADO
@@ -1823,4 +1813,25 @@ textarea{resize:vertical;min-height:72px}
   object-position:center !important;
   display:block !important;
   flex:0 0 42px !important;
+}
+
+/* Texto SPX estilizado no título do login */
+.spx-logo-text{
+  display:inline-block;
+  margin-left:8px;
+  font-family:var(--font-head);
+  font-weight:900;
+  font-style:italic;
+  font-size:.92em;
+  letter-spacing:-0.06em;
+  line-height:1;
+  white-space:nowrap;
+}
+
+.spx-logo-text .spx-gray{
+  color:#6D6E71;
+}
+
+.spx-logo-text .spx-green{
+  color:#39B54A;
 }
